@@ -1,0 +1,19 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\orbit.cs">
+    <Files>
+      <File FileName="Assets\orbit.cs" Line="14" Column="38" />
+      <File FileName="Assets\collision.cs" Line="27" Column="47" />
+      <File FileName="Assets\controls.cs" Line="53" Column="38" />
+      <File FileName="Assets\camera.cs" Line="18" Column="97" />
+      <File FileName="Assets\shieldlogic.cs" Line="22" Column="5" />
+      <File FileName="Assets\attack.cs" Line="11" Column="38" />
+      <File FileName="Assets\projectile.cs" Line="7" Column="17" />
+      <File FileName="Assets\enemyspawn.cs" Line="25" Column="1" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
