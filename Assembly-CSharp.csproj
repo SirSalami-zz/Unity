@@ -47,12 +47,11 @@
      <Compile Include="Assets\attack.cs" />
      <Compile Include="Assets\camera.cs" />
      <Compile Include="Assets\collision.cs" />
-     <Compile Include="Assets\controls.cs" />
-     <Compile Include="Assets\createplanet.cs" />
-     <Compile Include="Assets\enemyspawn.cs" />
-     <Compile Include="Assets\orbit.cs" />
+     <Compile Include="Assets\planetlogic.cs" />
+     <Compile Include="Assets\playerlogic.cs" />
      <Compile Include="Assets\projectile.cs" />
      <Compile Include="Assets\shieldlogic.cs" />
+     <Compile Include="Assets\starlogic.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

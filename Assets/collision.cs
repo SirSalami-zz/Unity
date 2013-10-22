@@ -4,14 +4,14 @@ using System.Collections;
 public class collision : MonoBehaviour {
 	
 	public GameObject player;
-	private controls controlscript;
+	private playerlogic playerlogicscript;
 	
 
 	// Use this for initialization
 	void Start () {
 		
 		player = GameObject.Find("player");
-		controlscript = player.GetComponent<controls>();
+		playerlogicscript = player.GetComponent<playerlogic>();
 	
 	}
 	
@@ -24,7 +24,7 @@ public class collision : MonoBehaviour {
 		if (hitpoints <= 0)
 		{
 			//print (controlscript.score);
-			controlscript.score = controlscript.score+1;
+			playerlogicscript.score = playerlogicscript.score+1;
 			GameObject explosionclone = Instantiate(explosion, transform.position, transform.rotation) as GameObject;
 			Destroy(explosionclone, 2.0f);
 			Destroy(gameObject);
