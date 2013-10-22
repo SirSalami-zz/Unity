@@ -48,6 +48,7 @@
      <Compile Include="Assets\camera.cs" />
      <Compile Include="Assets\collision.cs" />
      <Compile Include="Assets\controls.cs" />
+     <Compile Include="Assets\createplanet.cs" />
      <Compile Include="Assets\enemyspawn.cs" />
      <Compile Include="Assets\orbit.cs" />
      <Compile Include="Assets\projectile.cs" />
