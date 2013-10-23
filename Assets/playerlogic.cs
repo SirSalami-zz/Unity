@@ -18,6 +18,7 @@ public class playerlogic : MonoBehaviour {
 	public bool dead;
 	public GameObject shield;
 	public int score;
+	public GameObject solarenergy;
 	
 	//temp
 	GameObject star;
@@ -48,12 +49,23 @@ public class playerlogic : MonoBehaviour {
 	        transform.rotation = Quaternion.Lerp(transform.rotation, target, Time.deltaTime * smooth);
 			
 			//debugging rays
-			Debug.DrawRay(transform.position, transform.right*100, Color.green, 0);
+			Debug.DrawRay(transform.position, transform.right*100, Color.red, 0);
 			star = GameObject.Find("star");
 			Debug.DrawRay(transform.position, star.transform.position - transform.position, Color.yellow, 0, false);
 			if (Input.GetKey (KeyCode.Mouse0))
 			{
-				Debug.DrawRay(transform.position, mousepos, Color.red, 0);
+				Debug.DrawRay(transform.position, mousepos, Color.green, 0);
+			}
+			
+			//temp: increase score when in close proximity to star. show particles
+			if (Vector3.Distance(transform.position, star.transform.position+new Vector3(0,0,-60)) < 10.0f )
+			{
+				solarenergy.particleSystem.emissionRate = 10;
+				score++;
+			}
+			else
+			{
+				solarenergy.particleSystem.emissionRate = 0;
 			}
 			
 			//move in direction of target mouse position constantly. checks currently velocity and reduces if necessary
