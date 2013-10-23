@@ -2,13 +2,16 @@
 using System.Collections;
 
 public class shieldlogic : MonoBehaviour {
+	
+	public GameObject player;
+	public float shieldhealth;
 
 	// Use this for initialization
 	void Start () {
+		
+		shieldhealth = 5.0f;
 	
 	}
-	
-	public GameObject player;
 	
 	// Update is called once per frame
 	void Update () {
@@ -18,7 +21,15 @@ public class shieldlogic : MonoBehaviour {
 	}
 	
     void OnCollisionEnter(Collision collision) {
-		Destroy(gameObject, 0.25f);	
-		//print ("ping");
+		
+		if (shieldhealth < 0)
+		{
+			Destroy(gameObject, 0.25f);	
+		}
+		else
+		{
+			shieldhealth -= 1;
+		}
+
 	}
 }

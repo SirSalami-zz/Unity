@@ -20,6 +20,8 @@ public class playerlogic : MonoBehaviour {
 	public int score;
 	public GameObject solarenergy;
 	int activeenemies;
+	public GameObject missle;
+	public GameObject homingtarget;
 	
 	//temp
 	GameObject star;
@@ -32,10 +34,43 @@ public class playerlogic : MonoBehaviour {
 		{
 			GUI.Box(new Rect(Screen.width/2-100,Screen.height-20,200,20), "ALERT! Threats Detected: " + activeenemies);
 		}
+		if (homingtarget)
+		{
+			GUI.Box(new Rect(Screen.width/2 - 50, 10, 100, 20), "Target Aquired");
+		}
 	}
+	
  
     void Update ()
     {
+		
+		//targeting temp
+		
+		if (Input.GetKey(KeyCode.Mouse1))
+		{
+	        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+	        RaycastHit hit;
+	        if (Physics.Raycast(ray, out hit, 50, 1 << 9))
+			{
+				homingtarget = hit.transform.gameObject;
+				print ("target aquired");
+			}
+			else
+			{
+				print ("");
+			}
+		}
+		if (Input.GetKeyUp(KeyCode.Mouse1) && homingtarget)
+		{
+			misslelogic misslelogicscript = missle.GetComponent<misslelogic>();
+			misslelogicscript.homingtarget = homingtarget;
+			GameObject missleclone = Instantiate(missle, transform.position,  transform.rotation) as GameObject;
+			missleclone.rigidbody.velocity = rigidbody.velocity;
+			homingtarget = null;
+		}
+		
+		///targeting temp
+		
 		if (!dead)
 		{
 			//sets target angle based on mouse screen position when clicked

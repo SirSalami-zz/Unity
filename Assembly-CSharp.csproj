@@ -47,9 +47,9 @@
      <Compile Include="Assets\attack.cs" />
      <Compile Include="Assets\camera.cs" />
      <Compile Include="Assets\collision.cs" />
+     <Compile Include="Assets\misslelogic.cs" />
      <Compile Include="Assets\planetlogic.cs" />
      <Compile Include="Assets\playerlogic.cs" />
-     <Compile Include="Assets\projectile.cs" />
      <Compile Include="Assets\shieldlogic.cs" />
      <Compile Include="Assets\starlogic.cs" />
   </ItemGroup>

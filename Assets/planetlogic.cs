@@ -25,7 +25,7 @@ public class planetlogic : MonoBehaviour {
 		}
 
 	}
- 
+	
 	void Update() {
 	    // rotation
 	    transform.Rotate(Vector3.right * rotationspeed * Time.deltaTime);
