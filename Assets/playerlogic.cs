@@ -19,6 +19,7 @@ public class playerlogic : MonoBehaviour {
 	public GameObject shield;
 	public int score;
 	public GameObject solarenergy;
+	int activeenemies;
 	
 	//temp
 	GameObject star;
@@ -26,6 +27,11 @@ public class playerlogic : MonoBehaviour {
 	void OnGUI()
 	{
 		GUI.Box(new Rect(Screen.width-100,Screen.height-20,100,20), "Score: " + score);
+		activeenemies = GameObject.FindGameObjectsWithTag("enemy").Length;
+		if (activeenemies > 0)
+		{
+			GUI.Box(new Rect(Screen.width/2-100,Screen.height-20,200,20), "ALERT! Threats Detected: " + activeenemies);
+		}
 	}
  
     void Update ()
@@ -57,8 +63,8 @@ public class playerlogic : MonoBehaviour {
 				Debug.DrawRay(transform.position, mousepos, Color.green, 0);
 			}
 			
-			//temp: increase score when in close proximity to star. show particles
-			if (Vector3.Distance(transform.position, star.transform.position+new Vector3(0,0,-60)) < 10.0f )
+			//temp: increase score when in close proximity to star. show particles (based on star scale)
+			if (Vector3.Distance(transform.position, star.transform.position+new Vector3(0,0,-60)) < star.transform.localScale.x )
 			{
 				solarenergy.particleSystem.emissionRate = 10;
 				score++;
@@ -72,12 +78,10 @@ public class playerlogic : MonoBehaviour {
 			if (rigidbody.velocity.magnitude < maxspeed)
 			{
 				rigidbody.AddForce(transform.right * movementspeed);
-				//print (Mathf.Round((rigidbody.velocity.magnitude)*10));
 			}
 			else
 			{
 				rigidbody.AddForce(rigidbody.velocity * -1);
-				//print (Mathf.Round((rigidbody.velocity.magnitude)*10));
 			}
 	
 			//increase charge state when mouse1 is held

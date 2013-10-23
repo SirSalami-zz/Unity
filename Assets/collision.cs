@@ -24,7 +24,7 @@ public class collision : MonoBehaviour {
 		if (hitpoints <= 0)
 		{
 			//print (controlscript.score);
-			playerlogicscript.score = playerlogicscript.score+1;
+			playerlogicscript.score = playerlogicscript.score+10;
 			GameObject explosionclone = Instantiate(explosion, transform.position, transform.rotation) as GameObject;
 			Destroy(explosionclone, 2.0f);
 			Destroy(gameObject);

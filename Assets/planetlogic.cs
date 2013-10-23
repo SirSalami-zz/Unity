@@ -34,16 +34,14 @@ public class planetlogic : MonoBehaviour {
 	    transform.RotateAround (target.transform.position, Vector3.forward, orbitspeed * Time.deltaTime);
 		
 		//check if player is in range of sun to spawn. move this to sun at somepoint so it's called less
-		print (Vector3.Distance(target.transform.position+new Vector3(0,0,-60), player.transform.position));
+		//print (Vector3.Distance(target.transform.position+new Vector3(0,0,-60), player.transform.position));
 		if (Vector3.Distance(target.transform.position+new Vector3(0,0,-60), player.transform.position) < 30)
 		{
 			trigger = true;
-			print ("ALERT!");
 		}
 		else
 		{
 			trigger = false;
-			print ("");
 		}
 		
 		//spawn enemies
