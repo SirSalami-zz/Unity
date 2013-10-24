@@ -15,16 +15,23 @@ public class playerlogic : MonoBehaviour {
 	float shottimer;
 	int shotstofire;
 	int shotsfired;
+	bool shotbuffer;
 	public bool dead;
 	public GameObject shield;
 	public int score;
 	public GameObject solarenergy;
+	public GameObject charge;
 	int activeenemies;
 	public GameObject missle;
 	public GameObject homingtarget;
 	
 	//temp
 	GameObject star;
+	
+	void Start()
+	{
+		star = GameObject.Find("star");
+	}
 	
 	void OnGUI()
 	{
@@ -40,117 +47,122 @@ public class playerlogic : MonoBehaviour {
 		}
 	}
 	
- 
-    void Update ()
-    {
-		
-		//targeting temp
-		
-		if (Input.GetKey(KeyCode.Mouse1))
-		{
-	        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-	        RaycastHit hit;
-	        if (Physics.Raycast(ray, out hit, 50, 1 << 9))
-			{
-				homingtarget = hit.transform.gameObject;
-				print ("target aquired");
-			}
-			else
-			{
-				print ("");
-			}
-		}
-		if (Input.GetKeyUp(KeyCode.Mouse1) && homingtarget)
-		{
-			misslelogic misslelogicscript = missle.GetComponent<misslelogic>();
-			misslelogicscript.homingtarget = homingtarget;
-			GameObject missleclone = Instantiate(missle, transform.position,  transform.rotation) as GameObject;
-			missleclone.rigidbody.velocity = rigidbody.velocity;
-			homingtarget = null;
-		}
-		
-		///targeting temp
-		
+	float mousetimer;
+	
+	void Update()
+	{
 		if (!dead)
 		{
-			//sets target angle based on mouse screen position when clicked
-			Vector3 mousepos = new Vector3(Input.mousePosition.x - Screen.width/2, Input.mousePosition.y - Screen.height/2, 0);
-			if (Input.GetKey(KeyCode.Mouse0))
-			{
-				targetangle = Vector3.Angle(Vector3.right, mousepos);
-				if ((Input.mousePosition.y - Screen.height/2) < 0)
-				{
-		        	targetangle *=-1;
-				}
-
-			}
-			
-			//smoothly rotates object in relation to target position (wtf is a quaternion) ;)
-	        Quaternion target = Quaternion.Euler(0, 0, targetangle);
-	        transform.rotation = Quaternion.Lerp(transform.rotation, target, Time.deltaTime * smooth);
-			
-			//debugging rays
-			Debug.DrawRay(transform.position, transform.right*100, Color.red, 0);
-			star = GameObject.Find("star");
-			Debug.DrawRay(transform.position, star.transform.position - transform.position, Color.yellow, 0, false);
-			if (Input.GetKey (KeyCode.Mouse0))
-			{
-				Debug.DrawRay(transform.position, mousepos, Color.green, 0);
-			}
-			
 			//temp: increase score when in close proximity to star. show particles (based on star scale)
 			if (Vector3.Distance(transform.position, star.transform.position+new Vector3(0,0,-60)) < star.transform.localScale.x )
 			{
-				solarenergy.particleSystem.emissionRate = 10;
-				score++;
+				if (!charging)
+				{
+					solarenergy.particleSystem.emissionRate = 10;
+					score++;
+				}
 			}
 			else
 			{
 				solarenergy.particleSystem.emissionRate = 0;
 			}
 			
-			//move in direction of target mouse position constantly. checks currently velocity and reduces if necessary
-			if (rigidbody.velocity.magnitude < maxspeed)
+			//temp: missile targeting
+			if (Input.GetKey(KeyCode.Mouse1))
 			{
-				rigidbody.AddForce(transform.right * movementspeed);
+		        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+		        RaycastHit hit;
+		        if (Physics.Raycast(ray, out hit, 50, 1 << 9))
+				{
+					homingtarget = hit.transform.gameObject;
+					print ("target aquired");
+				}
+				else
+				{
+					print ("");
+				}
 			}
-			else
+			if (Input.GetKeyUp(KeyCode.Mouse1) && homingtarget)
 			{
-				rigidbody.AddForce(rigidbody.velocity * -1);
+				misslelogic misslelogicscript = missle.GetComponent<misslelogic>();
+				misslelogicscript.homingtarget = homingtarget;
+				GameObject missleclone = Instantiate(missle, transform.position,  transform.rotation) as GameObject;
+				missleclone.rigidbody.velocity = rigidbody.velocity;
+				homingtarget = null;
 			}
-	
-			//increase charge state when mouse1 is held
-			if (Input.GetKeyDown (KeyCode.Mouse0))
+			///targeting temp
+			
+			//increase charge state when mouse1 is held on player
+			if (Input.GetKey(KeyCode.Mouse0) && !firing)
 			{
-				charging = true;
+				mousetimer += Time.deltaTime;
+				//check if mouse was just press and is within chargebubble
+				if (mousetimer < 0.1f)
+				{
+			        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+			        RaycastHit hit;
+			        if (Physics.Raycast(ray, out hit, 50, 1 << 11))
+					{
+						charging = true;
+					}
+				}
 			}
+			
 			if (charging)
 			{
+				TrailRenderer trail = gameObject.GetComponent<TrailRenderer>();
+				trail.time = 0;
+				charge.particleSystem.emissionRate = 50;
 	   			chargetime += Time.deltaTime;
 				chargetime = Mathf.Clamp(chargetime, 0, 3);
 			}
-			
-			//set firing mode forwardon mouse release
-			if (Input.GetKeyUp (KeyCode.Mouse0) && !firing)
+			else
 			{
-				firing = true;
-				charging = false;
-				shottimer = Time.time + rapidfiredelay;
+				TrailRenderer trail = gameObject.GetComponent<TrailRenderer>();
+				trail.time = 0.5f;
+				charge.particleSystem.emissionRate = 0;
+			}
+			
+			print (mousetimer);
+			
+			//set firing mode on mouse release or if there is a shot in the buffer
+			if (Input.GetKeyUp (KeyCode.Mouse0) || shotbuffer)
+			{
+				if (mousetimer < 0.35f || chargetime > 0.5f)
+				{
+					//remove shot from buffer
+					if (shotbuffer)
+					{
+						shotbuffer = false;
+					}
+					
+					if (!firing)
+					{
+						//set to rapidfire settings if very little chargetime
+						if (chargetime <= 0.5f)
+						{
+							shotstofire = 3;
+							chargetime = 0.2f;
+						}
+						else
+						{
+							shotstofire = 1;
+						}
+						firing = true;
+						charging = false;
+						shottimer = Time.time + rapidfiredelay;
+					}
+					else if (shotstofire < 6 && !shotbuffer)
+					{
+						shotbuffer = true;
+					}
+				}
+					mousetimer = 0;
 			}
 			
 			//firing mechanism
 			if (firing == true)
 			{
-				//set to rapidfire settings if very little chargetime
-				if (chargetime <= 0.5f)
-				{
-					shotstofire = 3;
-					chargetime = 0.2f;
-				}
-				else
-				{
-					shotstofire = 1;
-				}
 				//instantiate shot, grows when charged, sets bullet to self destruct, adds reverse force to player
 				Vector3 firepos = transform.position;
 				if(Time.time > shottimer)
@@ -182,8 +194,58 @@ public class playerlogic : MonoBehaviour {
 				}
 			}
 		}
+	}
+	
+ 
+    void FixedUpdate ()
+    {
+		if (!dead)
+		{
+			//sets target angle based on mouse screen position when clicked
+			Vector3 mousepos = new Vector3(Input.mousePosition.x - Screen.width/2, Input.mousePosition.y - Screen.height/2, 0);
+			if (Input.GetKey(KeyCode.Mouse0))
+			{
+				//check if mouse is in chargebubble (2nd similar call (charging), need to consolidate)
+		        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+		        RaycastHit hit;
+		        if (!Physics.Raycast(ray, out hit, 50, 1 << 11))
+				{
+					targetangle = Vector3.Angle(Vector3.right, mousepos);
+					if ((Input.mousePosition.y - Screen.height/2) < 0)
+					{
+			        	targetangle *=-1;
+					}
+				}
+			}
+			
+			//smoothly rotates object in relation to target position (wtf is a quaternion) ;)
+	        Quaternion target = Quaternion.Euler(0, 0, targetangle);
+	        transform.rotation = Quaternion.Lerp(transform.rotation, target, Time.deltaTime * smooth);
+			
+			//debugging rays
+			Debug.DrawRay(transform.position, transform.right*100, Color.red, 0);
+			//Debug.DrawRay(transform.position, star.transform.position - transform.position, Color.yellow, 0, false);
+			if (Input.GetKey (KeyCode.Mouse0))
+			{
+				Debug.DrawRay(transform.position, mousepos, Color.green, 0);
+			}
+			
+			//move in direction of target mouse position constantly. checks currently velocity and reduces if necessary
+			if (!charging)
+			{
+				if (rigidbody.velocity.magnitude < maxspeed)
+				{
+					rigidbody.AddForce(transform.right * movementspeed);
+				}
+				else
+				{
+					rigidbody.AddForce(rigidbody.velocity * -1);
+				}
+			}
+		}
     }
 	
+
 	// bad collision event
 	public GameObject explosion;
 	
