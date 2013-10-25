@@ -3,10 +3,14 @@ using System.Collections;
 
 public class playerlogic : MonoBehaviour {
 	
+	float mousetimer;
+	public Vector3 mousepos;
+	public Vector3 mouseinputposition;
 	public float movementspeed = 10f;
 	public float maxspeed = 25f;
     public float smooth = 4.5f;
 	public float targetangle;
+	public float movementtargetangle;
 	public GameObject bulletclone;
 	bool charging = false;
 	bool firing = false;
@@ -47,10 +51,41 @@ public class playerlogic : MonoBehaviour {
 		}
 	}
 	
-	float mousetimer;
+
 	
 	void Update()
 	{
+		
+		//sets target angles based on mouse screen position when clicked or dragged
+		Vector3 mousepos = new Vector3(Input.mousePosition.x - Screen.width/2, Input.mousePosition.y - Screen.height/2, 0);
+		if (Input.GetKeyDown(KeyCode.Mouse0))
+		{
+			mouseinputposition = mousepos;
+		}
+		
+		if (Input.GetKey(KeyCode.Mouse0))
+		{
+			//check if mouse is in chargebubble (2nd similar call (charging), need to consolidate)
+	        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+	        RaycastHit hit;
+	        if (!Physics.Raycast(ray, out hit, 50, 1 << 11))
+			{
+				targetangle = Vector3.Angle(Vector3.right, mousepos);
+				if ((Input.mousePosition.y - Screen.height/2) < 0)
+				{
+		        	targetangle *=-1;
+				}
+				//only set movement target angle when draged a certain distance
+				if (Vector3.Distance(mousepos, mouseinputposition) > 250.0f || mousetimer > 0.35)
+				{
+					if (!charging)
+					{
+						movementtargetangle = targetangle;
+					}
+				}
+			}
+		}
+		
 		if (!dead)
 		{
 			//temp: increase score when in close proximity to star. show particles (based on star scale)
@@ -104,6 +139,7 @@ public class playerlogic : MonoBehaviour {
 			        if (Physics.Raycast(ray, out hit, 50, 1 << 11))
 					{
 						charging = true;
+						charge.particleSystem.Play();
 					}
 				}
 			}
@@ -122,13 +158,12 @@ public class playerlogic : MonoBehaviour {
 				trail.time = 0.5f;
 				charge.particleSystem.emissionRate = 0;
 			}
-			
-			print (mousetimer);
+
 			
 			//set firing mode on mouse release or if there is a shot in the buffer
 			if (Input.GetKeyUp (KeyCode.Mouse0) || shotbuffer)
 			{
-				if (mousetimer < 0.35f || chargetime > 0.5f)
+				if (mousetimer < 0.35f || chargetime >= 0.35f)
 				{
 					//remove shot from buffer
 					if (shotbuffer)
@@ -143,21 +178,30 @@ public class playerlogic : MonoBehaviour {
 						{
 							shotstofire = 3;
 							chargetime = 0.2f;
+							firing = true;
+							shottimer = Time.time;
 						}
 						else
 						{
-							shotstofire = 1;
+							if (Vector3.Distance(mousepos, mouseinputposition) > 100.0f)
+							{
+								shotstofire = 1;
+								firing = true;
+								shottimer = Time.time;
+							}
+							else
+							{
+								chargetime = 0.0f;
+							}
 						}
-						firing = true;
-						charging = false;
-						shottimer = Time.time + rapidfiredelay;
 					}
 					else if (shotstofire < 6 && !shotbuffer)
 					{
 						shotbuffer = true;
 					}
 				}
-					mousetimer = 0;
+				mousetimer = 0;
+				charging = false;
 			}
 			
 			//firing mechanism
@@ -167,7 +211,7 @@ public class playerlogic : MonoBehaviour {
 				Vector3 firepos = transform.position;
 				if(Time.time > shottimer)
 				{
-					GameObject newbullet = Instantiate(bulletclone, firepos,  transform.rotation) as GameObject;
+					GameObject newbullet = Instantiate(bulletclone, firepos,  Quaternion.Euler(0, 0, targetangle)) as GameObject;
 					newbullet.transform.localScale = newbullet.transform.localScale*chargetime;
 					newbullet.rigidbody.mass = chargetime * 10;
 					newbullet.rigidbody.velocity = rigidbody.velocity*0.5f;
@@ -175,13 +219,14 @@ public class playerlogic : MonoBehaviour {
 					Destroy(newbullet, 3);
 					shotsfired++;
 					shottimer = Time.time + rapidfiredelay;
+					//handle kickback
 					if (chargetime > 0.2f)
 					{
-						rigidbody.AddForce(transform.right * (chargetime*10f) * -1, ForceMode.Impulse);
+						rigidbody.AddForce(newbullet.transform.right * (chargetime*5f) * -1, ForceMode.Impulse);
 					}
 					else
 					{
-						rigidbody.AddForce(transform.right * (chargetime*5f) * -1, ForceMode.Impulse);
+						rigidbody.AddForce(newbullet.transform.right * (chargetime*2.5f) * -1, ForceMode.Impulse);
 					}
 				}
 				//handing rapidfire
@@ -201,25 +246,8 @@ public class playerlogic : MonoBehaviour {
     {
 		if (!dead)
 		{
-			//sets target angle based on mouse screen position when clicked
-			Vector3 mousepos = new Vector3(Input.mousePosition.x - Screen.width/2, Input.mousePosition.y - Screen.height/2, 0);
-			if (Input.GetKey(KeyCode.Mouse0))
-			{
-				//check if mouse is in chargebubble (2nd similar call (charging), need to consolidate)
-		        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-		        RaycastHit hit;
-		        if (!Physics.Raycast(ray, out hit, 50, 1 << 11))
-				{
-					targetangle = Vector3.Angle(Vector3.right, mousepos);
-					if ((Input.mousePosition.y - Screen.height/2) < 0)
-					{
-			        	targetangle *=-1;
-					}
-				}
-			}
-			
 			//smoothly rotates object in relation to target position (wtf is a quaternion) ;)
-	        Quaternion target = Quaternion.Euler(0, 0, targetangle);
+	        Quaternion target = Quaternion.Euler(0, 0, movementtargetangle);
 	        transform.rotation = Quaternion.Lerp(transform.rotation, target, Time.deltaTime * smooth);
 			
 			//debugging rays

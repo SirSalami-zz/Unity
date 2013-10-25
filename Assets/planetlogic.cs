@@ -23,6 +23,8 @@ public class planetlogic : MonoBehaviour {
 			rotationspeed*=-1;
 			orbitspeed*=-1;
 		}
+		
+		transform.localScale *= Random.Range(0.5f, 2.5f);
 
 	}
 	
