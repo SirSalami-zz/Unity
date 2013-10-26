@@ -9,6 +9,7 @@ public class shieldlogic : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		
+		rigidbody.freezeRotation = true;
 		shieldhealth = 5.0f;
 	
 	}
@@ -16,7 +17,7 @@ public class shieldlogic : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		
-		transform.position = player.transform.position;
+		transform.position = new Vector3(transform.position.x, transform.position.y, 0);
 	
 	}
 	

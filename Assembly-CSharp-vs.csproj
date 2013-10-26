@@ -49,7 +49,7 @@
      <Compile Include="Assets\collision.cs" />
      <Compile Include="Assets\createplanet.cs" />
      <Compile Include="Assets\enemyspawn.cs" />
-     <Compile Include="Assets\misslelogic.cs" />
+     <Compile Include="Assets\missilelogic.cs" />
      <Compile Include="Assets\orbit.cs" />
      <Compile Include="Assets\planetlogic.cs" />
      <Compile Include="Assets\playerlogic.cs" />

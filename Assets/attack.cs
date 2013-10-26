@@ -15,6 +15,7 @@ public class attack : MonoBehaviour {
 	public float movementspeed = 10;
 	
 	void Update() {
+		transform.position = new Vector3(transform.position.x, transform.position.y, 0);
 	    transform.LookAt(player.transform.position);
 		//move in direction of target constantly. checks currently velocity and reduces if necessary
 		if (rigidbody.velocity.magnitude > movementspeed)

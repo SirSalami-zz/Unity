@@ -12,9 +12,9 @@ public class playerlogic : MonoBehaviour {
 	public float targetangle;
 	public float movementtargetangle;
 	public GameObject bulletclone;
-	bool charging = false;
+	public bool charging = false;
 	bool firing = false;
-	float chargetime;
+	public float chargetime;
 	public float rapidfiredelay = 0.1f;
 	float shottimer;
 	int shotstofire;
@@ -26,7 +26,7 @@ public class playerlogic : MonoBehaviour {
 	public GameObject solarenergy;
 	public GameObject charge;
 	int activeenemies;
-	public GameObject missle;
+	public GameObject missile;
 	public GameObject homingtarget;
 	
 	//temp
@@ -34,6 +34,7 @@ public class playerlogic : MonoBehaviour {
 	
 	void Start()
 	{
+		rigidbody.freezeRotation = true;
 		star = GameObject.Find("star");
 	}
 	
@@ -55,7 +56,7 @@ public class playerlogic : MonoBehaviour {
 	
 	void Update()
 	{
-		
+		transform.position = new Vector3(transform.position.x, transform.position.y, 0);
 		//sets target angles based on mouse screen position when clicked or dragged
 		Vector3 mousepos = new Vector3(Input.mousePosition.x - Screen.width/2, Input.mousePosition.y - Screen.height/2, 0);
 		if (Input.GetKeyDown(KeyCode.Mouse0))
@@ -89,13 +90,10 @@ public class playerlogic : MonoBehaviour {
 		if (!dead)
 		{
 			//temp: increase score when in close proximity to star. show particles (based on star scale)
-			if (Vector3.Distance(transform.position, star.transform.position+new Vector3(0,0,-60)) < star.transform.localScale.x )
+			if (Vector3.Distance(transform.position, star.transform.position) < star.transform.localScale.x )
 			{
-				if (!charging)
-				{
-					solarenergy.particleSystem.emissionRate = 10;
-					score++;
-				}
+				solarenergy.particleSystem.emissionRate = 10;
+				score++;
 			}
 			else
 			{
@@ -110,19 +108,17 @@ public class playerlogic : MonoBehaviour {
 		        if (Physics.Raycast(ray, out hit, 50, 1 << 9))
 				{
 					homingtarget = hit.transform.gameObject;
-					print ("target aquired");
 				}
 				else
 				{
-					print ("");
 				}
 			}
 			if (Input.GetKeyUp(KeyCode.Mouse1) && homingtarget)
 			{
-				misslelogic misslelogicscript = missle.GetComponent<misslelogic>();
-				misslelogicscript.homingtarget = homingtarget;
-				GameObject missleclone = Instantiate(missle, transform.position,  transform.rotation) as GameObject;
-				missleclone.rigidbody.velocity = rigidbody.velocity;
+				missilelogic missilelogicscript = missile.GetComponent<missilelogic>();
+				missilelogicscript.homingtarget = homingtarget;
+				GameObject missileclone = Instantiate(missile, transform.position,  transform.rotation) as GameObject;
+				missileclone.rigidbody.velocity = rigidbody.velocity;
 				homingtarget = null;
 			}
 			///targeting temp
@@ -158,7 +154,6 @@ public class playerlogic : MonoBehaviour {
 				trail.time = 0.5f;
 				charge.particleSystem.emissionRate = 0;
 			}
-
 			
 			//set firing mode on mouse release or if there is a shot in the buffer
 			if (Input.GetKeyUp (KeyCode.Mouse0) || shotbuffer)
@@ -207,6 +202,10 @@ public class playerlogic : MonoBehaviour {
 			//firing mechanism
 			if (firing == true)
 			{
+				if (shotbuffer)
+				{
+					shotstofire += 3;
+				}
 				//instantiate shot, grows when charged, sets bullet to self destruct, adds reverse force to player
 				Vector3 firepos = transform.position;
 				if(Time.time > shottimer)
@@ -216,17 +215,18 @@ public class playerlogic : MonoBehaviour {
 					newbullet.rigidbody.mass = chargetime * 10;
 					newbullet.rigidbody.velocity = rigidbody.velocity*0.5f;
 					newbullet.rigidbody.AddForce(newbullet.transform.right * (chargetime*10000));
+					newbullet.rigidbody.freezeRotation = true;
 					Destroy(newbullet, 3);
 					shotsfired++;
 					shottimer = Time.time + rapidfiredelay;
 					//handle kickback
 					if (chargetime > 0.2f)
 					{
-						rigidbody.AddForce(newbullet.transform.right * (chargetime*5f) * -1, ForceMode.Impulse);
+						rigidbody.AddForce(newbullet.transform.right * (chargetime*movementspeed) * -1, ForceMode.Impulse);
 					}
 					else
 					{
-						rigidbody.AddForce(newbullet.transform.right * (chargetime*2.5f) * -1, ForceMode.Impulse);
+						rigidbody.AddForce(newbullet.transform.right * (chargetime*movementspeed*0.2f) * -1, ForceMode.Impulse);
 					}
 				}
 				//handing rapidfire
