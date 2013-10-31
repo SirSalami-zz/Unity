@@ -46,11 +46,6 @@ public class planetlogic : MonoBehaviour {
 	void Update() {
 		
 		transform.position = new Vector3(transform.position.x, transform.position.y, 0);
-		
-		if (health < maxhealth)
-		{
-			health += Time.deltaTime;
-		}
 
 	    // rotation
 	    transform.Rotate(Vector3.forward * rotationspeed * Time.deltaTime);
@@ -64,8 +59,11 @@ public class planetlogic : MonoBehaviour {
 
 			if (renderer.isVisible || playerdistance < mydistance)
 			{
-				trigger = true;
-			}
+				if (Time.timeScale > 0)
+				{
+					trigger = true;
+				}
+			}	
 			else
 			{
 				trigger = false;
@@ -77,6 +75,16 @@ public class planetlogic : MonoBehaviour {
 		{
 			Instantiate(enemy, new Vector3(transform.position.x, transform.position.y, 0), transform.rotation);
 		}
+		
+		//health and effects
+		
+		if (health < maxhealth)
+		{
+			health += Time.deltaTime * 0.5f	;
+		}
+		
+		eruption.particleSystem.emissionRate = maxhealth - health;
+		
 	}
 	
     void OnCollisionEnter(Collision collision) {
@@ -87,7 +95,6 @@ public class planetlogic : MonoBehaviour {
 		}
 		else
 		{
-			eruption.particleSystem.emissionRate = maxhealth - health;
 			health -= collision.transform.localScale.x*2;
 		}
 

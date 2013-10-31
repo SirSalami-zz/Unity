@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class camera : MonoBehaviour {
+public class cameralogic : MonoBehaviour {
 	
 	public GameObject player;
 	playerlogic playerlogicscript;

@@ -28,6 +28,7 @@ public class playerlogic : MonoBehaviour {
 	int activeenemies;
 	public GameObject missile;
 	public GameObject homingtarget;
+	public bool pause;
 	
 	//temp
 	GameObject star;
@@ -56,6 +57,20 @@ public class playerlogic : MonoBehaviour {
 	
 	void Update()
 	{
+		//zoomout and pause
+		if (Input.GetAxis("Mouse ScrollWheel") < 0 && !pause)
+		{
+			pause = true;
+			Time.timeScale = 0;
+			Camera.main.orthographic = true;
+		}
+		if (Input.GetAxis("Mouse ScrollWheel") > 0 && pause)
+		{
+			pause = false;
+			Time.timeScale = 1;
+			Camera.main.orthographic = false;
+		}
+		
 		transform.position = new Vector3(transform.position.x, transform.position.y, 0);
 		//sets target angles based on mouse screen position when clicked or dragged
 		Vector3 mousepos = new Vector3(Input.mousePosition.x - Screen.width/2, Input.mousePosition.y - Screen.height/2, 0);
@@ -77,7 +92,7 @@ public class playerlogic : MonoBehaviour {
 		        	targetangle *=-1;
 				}
 				//only set movement target angle when draged a certain distance
-				if (Vector3.Distance(mousepos, mouseinputposition) > 250.0f || mousetimer > 0.35)
+				if (Vector3.Distance(mousepos, mouseinputposition) > 80.0f || mousetimer > 0.35)
 				{
 					if (!charging)
 					{
@@ -178,6 +193,7 @@ public class playerlogic : MonoBehaviour {
 						}
 						else
 						{
+							//disable charge
 							if (Vector3.Distance(mousepos, mouseinputposition) > 100.0f)
 							{
 								shotstofire = 1;

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class attack : MonoBehaviour {
+public class enemylogic : MonoBehaviour {
 	
 	public GameObject player; // drag the player here
 	
