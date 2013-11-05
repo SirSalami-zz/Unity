@@ -3,6 +3,7 @@ using System.Collections;
 
 public class planetlogic : MonoBehaviour {
 	
+	public GameObject systems;
 	public GameObject target; //target to orbit around
 	public GameObject player;
 	public GameObject enemy; //is set in editor
@@ -19,10 +20,10 @@ public class planetlogic : MonoBehaviour {
 		
 		rigidbody.freezeRotation = true;
 		
-		player = GameObject.Find("player");
+		transform.localScale *= Random.Range(1.0f, 3.5f);
 		
 		rotationspeed = Random.Range(20.0f, 75.0f);
-		orbitspeed = target.transform.localScale.x*Random.Range(0.2f, 1.0f);
+		orbitspeed = target.transform.localScale.x*Random.Range(0.2f, 0.6f);
         //rigidbody.AddTorque(Vector3.forward * -100);
 		if (Random.Range(0, 2) < 1)
 		{
@@ -32,8 +33,6 @@ public class planetlogic : MonoBehaviour {
 		{
 			orbitspeed*=-1;
 		}
-		
-		transform.localScale *= Random.Range(1.0f, 3.5f);
 
 		mydistance = Vector3.Distance(target.transform.position+new Vector3(0,0,0), transform.position);
 		
@@ -45,6 +44,7 @@ public class planetlogic : MonoBehaviour {
 	
 	void Update() {
 		
+		// z-fight
 		transform.position = new Vector3(transform.position.x, transform.position.y, 0);
 
 	    // rotation
@@ -57,23 +57,25 @@ public class planetlogic : MonoBehaviour {
 		//print (Vector3.Distance(target.transform.position+new Vector3(0,0,-60), player.transform.position));
 		float playerdistance = Vector3.Distance(target.transform.position, player.transform.position);
 
-			if (renderer.isVisible || playerdistance < mydistance)
+		if (renderer.isVisible || playerdistance < mydistance)
+		{
+			if (Time.timeScale > 0)
 			{
-				if (Time.timeScale > 0)
-				{
-					trigger = true;
-				}
-			}	
-			else
-			{
-				trigger = false;
+				trigger = true;
 			}
+		}	
+		else
+		{
+			trigger = false;
+		}
 		
 		//spawn enemies
 		//print (timer);
-		if (Time.frameCount%100 == 0 && trigger)
+		if (Time.frameCount%100 == 0 && trigger && Time.timeScale > 0)
 		{
-			Instantiate(enemy, new Vector3(transform.position.x, transform.position.y, 0), transform.rotation);
+			GameObject enemyclone = Instantiate(enemy, new Vector3(transform.position.x, transform.position.y, 0), transform.rotation) as GameObject;
+			enemyclone.GetComponent<enemylogic>().player = player;
+			enemyclone.GetComponent<collision>().player = player;
 		}
 		
 		//health and effects

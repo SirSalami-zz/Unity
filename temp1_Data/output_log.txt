@@ -1,7 +1,7 @@
 Initialize engine version: 4.2.1f4 (4d30acc925c2)
 GfxDevice: creating device client; threaded=1
 Direct3D:
-    Version:  Direct3D 9.0c [nvd3dum.dll 9.18.13.2723]
+    Version:  Direct3D 9.0c [nvd3dum.dll 9.18.13.3158]
     Renderer: NVIDIA GeForce GT 650M 
     Vendor:   NVIDIA
     VRAM:     1986 MB (via DXGI)
@@ -11,7 +11,7 @@ Platform assembly: C:\Users\Dave\Documents\New Unity Project\temp1_Data\Managed\
 Loading C:\Users\Dave\Documents\New Unity Project\temp1_Data\Managed\UnityEngine.dll into Unity Child Domain
 Platform assembly: C:\Users\Dave\Documents\New Unity Project\temp1_Data\Managed\Assembly-CSharp.dll (this message is harmless)
 Loading C:\Users\Dave\Documents\New Unity Project\temp1_Data\Managed\Assembly-CSharp.dll into Unity Child Domain
-- Completed reload, in  0.038 seconds
+- Completed reload, in  0.040 seconds
 desktop: 1920x1080 59Hz; virtual: 1920x1080 at 0,0
 <RI> Initializing input.
 <RI> Input initialized.

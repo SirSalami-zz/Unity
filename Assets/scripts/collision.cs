@@ -10,9 +10,8 @@ public class collision : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		
-		player = GameObject.Find("player");
 		playerlogicscript = player.GetComponent<playerlogic>();
-	
+		
 	}
 	
 	public int hitpoints = 1;

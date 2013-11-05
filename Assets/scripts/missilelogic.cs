@@ -10,7 +10,7 @@ public class missilelogic : MonoBehaviour {
 	void Start () {
 		
 		timer = 0;
-		rigidbody.AddForce(transform.right * 50, ForceMode.Impulse);
+		rigidbody.AddForce(new Vector3(Random.Range(-2.0f, 0.0f), Random.Range(-1.0f, 1.0f), 0) * 10, ForceMode.Impulse);
 	
 	}
 	
@@ -29,7 +29,8 @@ public class missilelogic : MonoBehaviour {
 			if (timer > 0.5f)
 			{
 				transform.LookAt(homingtarget.transform.position);
-				rigidbody.AddForce(transform.forward * 50);
+				transform.position += transform.forward*15*Time.deltaTime;
+				//rigidbody.AddForce(transform.forward * 0.2f, ForceMode.Impulse);
 			}
 			else
 			{
