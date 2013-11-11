@@ -7,10 +7,11 @@ public class guilogic : MonoBehaviour {
 	public playerlogic playerlogicscript;
 	public GameObject systems;
 	public systemslogic systemslogicscript;
+	bool toggleTxt;
 	
 	// Use this for initialization
 	void Start () {
-	
+			toggleTxt = false;
 	}
 	
 	// Update is called once per frame
@@ -19,7 +20,7 @@ public class guilogic : MonoBehaviour {
 		if (player && playerlogicscript)
 		{
 			//score
-			GUI.Box(new Rect(Screen.width-100,Screen.height-30,100,20), "Score: " + playerlogicscript.score);
+			GUI.Box(new Rect(Screen.width-100,Screen.height-30,100,20), "Score: " + Mathf.Round(playerlogicscript.score));
 			
 			//threat detection
 			int activeenemies = GameObject.FindGameObjectsWithTag("enemy").Length;
@@ -76,6 +77,15 @@ public class guilogic : MonoBehaviour {
 			{
 				Application.Quit();
 			}
+			
+
+			GUI.Toggle(new Rect(Screen.width/2, 10, 100, 30), toggleTxt, "A Toggle text");
+			
+			if (toggleTxt)
+			{
+        		playerlogicscript.movementspeed = GUI.HorizontalSlider(new Rect(Screen.width/2, Screen.height/2, 100, 30), playerlogicscript.movementspeed, 0.0F, 100.0F);
+			}
+			
 			GUI.Box(new Rect(Screen.width-100, 0, 100, 20), "Level ");
 		}
 	

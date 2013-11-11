@@ -10,7 +10,7 @@ public class missilelogic : MonoBehaviour {
 	void Start () {
 		
 		timer = 0;
-		rigidbody.AddForce(new Vector3(Random.Range(-2.0f, 0.0f), Random.Range(-1.0f, 1.0f), 0) * 10, ForceMode.Impulse);
+		rigidbody.AddForce(new Vector3(Random.Range(5.0f, 0.0f), Random.Range(-5.0f, 5.0f), 0) * 10, ForceMode.Impulse);
 	
 	}
 	

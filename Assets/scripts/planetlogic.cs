@@ -7,6 +7,7 @@ public class planetlogic : MonoBehaviour {
 	public GameObject target; //target to orbit around
 	public GameObject player;
 	public GameObject enemy; //is set in editor
+	public GameObject asteroidprefab;
 	public bool trigger;
 	public float rotationspeed;
 	public float orbitspeed;
@@ -20,9 +21,11 @@ public class planetlogic : MonoBehaviour {
 		
 		rigidbody.freezeRotation = true;
 		
-		transform.localScale *= Random.Range(1.0f, 3.5f);
+		transform.localScale *= Random.Range(2.0f, 4.5f);
 		
-		rotationspeed = Random.Range(20.0f, 75.0f);
+		rotationspeed = Random.Range(20.0f, 35.0f);
+		//rotationspeed = 0.0f;
+		
 		orbitspeed = target.transform.localScale.x*Random.Range(0.2f, 0.6f);
         //rigidbody.AddTorque(Vector3.forward * -100);
 		if (Random.Range(0, 2) < 1)
@@ -93,6 +96,15 @@ public class planetlogic : MonoBehaviour {
 		
 		if (health < 0)
 		{
+			GameObject asteroidclone = Instantiate(asteroidprefab, transform.position, Random.rotation) as GameObject;
+			asteroidclone.GetComponent<asteroidlogic>().size = transform.localScale.x*0.5f;
+			Vector3 randomforce = new Vector3(Random.Range(-25.0f*transform.localScale.x, 25.0f*transform.localScale.x), Random.Range(-25.0f*transform.localScale.x, 25.0f*transform.localScale.x), 0.0f);
+			asteroidclone.rigidbody.AddForce(randomforce, ForceMode.Impulse);
+			asteroidclone = Instantiate(asteroidprefab, transform.position, Random.rotation) as GameObject;
+			asteroidclone.GetComponent<asteroidlogic>().size = transform.localScale.x*0.5f;
+			asteroidclone.rigidbody.AddForce(randomforce*-1, ForceMode.Impulse);
+			
+			player.GetComponent<playerlogic>().score += 1000;
 			Destroy(gameObject, 0.25f);	
 		}
 		else

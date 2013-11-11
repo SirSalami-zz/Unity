@@ -26,7 +26,6 @@ public class cameralogic : MonoBehaviour {
 			{
 				float chargetime = playerlogicscript.chargetime * 0.5f;
 				transform.position = new Vector3(player.transform.position.x + Random.Range(-0.1f, 0.1f)*chargetime, player.transform.position.y + Random.Range(-0.25f, 0.25f)*chargetime, transform.position.z);
-				Handheld.Vibrate();
 			}
 			else
 			{

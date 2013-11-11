@@ -8,19 +8,21 @@ public class playerlogic : MonoBehaviour {
 	float mousetimer;
 	public Vector3 mousepos;
 	public Vector3 mouseinputposition;
-	public float movementspeed = 10f;
-	public float maxspeed = 25f;
-    public float smooth = 4.5f;
+	public float movementspeed;
+	public float maxspeed;
+    public float smooth;
 	public float targetangle;
 	public float movementtargetangle;
 	public GameObject bulletclone;
 	public bool charging = false;
 	bool firing = false;
 	public float chargetime;
-	public float rapidfiredelay = 0.1f;
-	public float shotspeed = 1;
-	public float kickback = 1;
+	public float rapidfiredelay;
+	public float shotspeed;
+	public float kickback;
+	Vector3 kickbackvelocity;
 	float shottimer;
+	public int maxrapidfireshots;
 	int shotstofire;
 	int shotsfired;
 	bool shotbuffer;
@@ -49,10 +51,18 @@ public class playerlogic : MonoBehaviour {
 	{
 		rigidbody.freezeRotation = true;
 		star = GameObject.Find("star");
-		energy = 500.0f;
 		guisystem = GameObject.Find("guisystem");
 		guisystem.GetComponent<guilogic>().player = gameObject;
+		
+		//stats
+		energy = 500.0f;
+		maxrapidfireshots = 3;
 		brakes = 0.99f;
+		kickback = 5;
+		shotspeed = 1;
+		rapidfiredelay = 0.1f;
+		smooth = 4.5f;
+		movementspeed = 10.0f;
 	}
 
 	
@@ -130,13 +140,17 @@ public class playerlogic : MonoBehaviour {
 		if (energy > 0)
 		{
 			energy -= Time.deltaTime;
+			if (moving)
+			{
+				energy -= Time.deltaTime*5;
+			}
 			if (firing)
 			{
 				energy -= Time.deltaTime*10;
 			}
 			if (charging && chargetime < 3.0f)
 			{
-				energy -= 0.2f;
+				energy -= Time.deltaTime*25;
 			}
 		}
 		
@@ -178,8 +192,9 @@ public class playerlogic : MonoBehaviour {
 			if (refueling)
 			{
 				solarenergy.particleSystem.emissionRate = 10;
-				score += score+100*Time.deltaTime;
-				energy+=+25*Time.deltaTime;
+				score += 100*Time.deltaTime;
+				energy += 25*Time.deltaTime;
+				shield.GetComponent<shieldlogic>().shieldhealth -= Time.deltaTime*0.5f;
 			}
 			else
 			{
@@ -259,6 +274,7 @@ public class playerlogic : MonoBehaviour {
 						missilelogicscript.homingtarget = homingtarget;
 						GameObject missileclone = Instantiate(missile, transform.position,  transform.rotation) as GameObject;
 						missileclone.rigidbody.velocity = rigidbody.velocity;
+						energy -= 5;
 						i++;
 					}
 					homingtargets.Clear();
@@ -276,7 +292,7 @@ public class playerlogic : MonoBehaviour {
 						//set to rapidfire settings if very little chargetime
 						if (chargetime <= 0.5f)
 						{
-							shotstofire = 3;
+							shotstofire = maxrapidfireshots;
 							chargetime = 0.2f;
 							firing = true;
 							shottimer = Time.time;
@@ -334,11 +350,12 @@ public class playerlogic : MonoBehaviour {
 					if (chargetime > 0.2f)
 					{
 						newbullet.transform.localScale = new Vector3 (2.5f, 2.5f, 2.5f)*chargetime;
-						rigidbody.AddForce(newbullet.transform.right * ((chargetime*movementspeed)*kickback) * -1, ForceMode.Impulse);
+						kickbackvelocity += newbullet.transform.right * (chargetime*kickback) * -1;
 					}
 					else
 					{
-						rigidbody.AddForce(newbullet.transform.right * ((chargetime*movementspeed*0.2f)*kickback) * -1, ForceMode.Impulse);
+						kickbackvelocity += newbullet.transform.right * (chargetime*kickback) * -1;
+						rigidbody.AddForce(newbullet.transform.right * (chargetime*kickback) * -2, ForceMode.Impulse);
 					}
 				}
 				//handing rapidfire
@@ -386,6 +403,10 @@ public class playerlogic : MonoBehaviour {
 			{
 				rigidbody.velocity *=  brakes;
 			}
+			
+			//handle kickback
+			rigidbody.AddForce(kickbackvelocity, ForceMode.Impulse);
+			kickbackvelocity *= 0.0f;
 		}
     }
 	
