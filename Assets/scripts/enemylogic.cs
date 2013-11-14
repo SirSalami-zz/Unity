@@ -22,10 +22,13 @@ public class enemylogic : MonoBehaviour {
 	
 	void Update () {
 		
-		spawntimer += Time.deltaTime;
-		if (spawntimer > 2.0f)
+		if (collider.enabled == false)
 		{
-			collider.enabled = true;
+			spawntimer += Time.deltaTime;
+			if (spawntimer > 1.0f)
+			{
+				collider.enabled = true;
+			}
 		}
 		
 		//transform.position = new Vector3(transform.position.x, transform.position.y, 0);
@@ -40,21 +43,27 @@ public class enemylogic : MonoBehaviour {
 		{
 			Debug.DrawRay(transform.position, rigidbody.velocity.normalized * evadedistance, Color.red, 0.1f);
 			RaycastHit hit;
-	        Collider[] hitColliders = Physics.OverlapSphere(transform.position, evadedistance, 1 << 12);
+	        Collider[] hitColliders = Physics.OverlapSphere(transform.position, evadedistance, 1<<12);
 
 			if (hitColliders.Length > 0)
 			{
 					
 				evade = true;
-				evadetarget = hitColliders[0].gameObject;
+				float nearestobstacledistance = Mathf.Infinity;
+				foreach(Collider obstacle in hitColliders)
+				{
+					if (Vector3.Distance(transform.position, obstacle.transform.position) < nearestobstacledistance)
+					{
+						nearestobstacledistance = Vector3.Distance(transform.position, obstacle.transform.position);
+						evadetarget = obstacle.gameObject;
+					}
+				}
 
-				print(hitColliders[0].transform.tag);
 			}
 			else if (evade)
 			{
 				evade = false;
 				evadetarget = null;
-				print("");
 			}
 			pathfindingtimer = 0.0f;
 		}
@@ -74,12 +83,20 @@ public class enemylogic : MonoBehaviour {
 		{
 			if (evade && evadetarget)
 			{
-				rigidbody.AddForce(evadetarget.transform.position.normalized * (movementspeed*-0.25f), ForceMode.Impulse);
+				Debug.DrawLine(transform.position, evadetarget.transform.position, Color.green);
+				Vector3 direction = transform.position - evadetarget.transform.position;
+				print (Vector3.Angle(transform.position, evadetarget.transform.position));
+				if (Vector3.Angle(rigidbody.velocity, evadetarget.transform.position) < 90.0f)
+				{
+					transform.rotation = Quaternion.LookRotation(direction);
+					rigidbody.AddForce(transform.forward * movementspeed, ForceMode.Impulse);
+				}
 			}
 			else
 			{
 				rigidbody.AddForce(transform.forward * movementspeed, ForceMode.Impulse);
 			}
+
 		}
 	}
 }

@@ -91,22 +91,22 @@ public class playerlogic : MonoBehaviour {
 				pause = true;
 			}
 		}
-		if (pause)
+		if (pause && zoomlerp < 150.0f)
 		{
-			Time.timeScale = 0;
+			Time.timeScale = 0.0f;
 			Camera.main.orthographic = true;
-			Camera.main.farClipPlane = 100.0f;
+			Camera.main.farClipPlane = 1000.0f;
 			if (zoomlerp < 1)
 			{
 				zoomlerp += 0.05f;
-				Camera.main.orthographicSize = Mathf.Lerp (20.0f, 250.0f, zoomlerp);
+				Camera.main.orthographicSize = Mathf.Lerp (20.0f, 150.0f, zoomlerp);
 			}
 		}
 		else
 		{
 			Time.timeScale = 1;
 			Camera.main.orthographic = false;
-			Camera.main.farClipPlane = 350.0f;
+			Camera.main.farClipPlane = 1000.0f;
 			zoomlerp = 0;
 		}
 		
@@ -127,7 +127,7 @@ public class playerlogic : MonoBehaviour {
 		}
 		
 		//set refueling state of player if close proximity
-		if (closeststar && stardistance < closeststar.transform.localScale.x)
+		if (closeststar && stardistance < closeststar.transform.localScale.x+2)
 		{
 			refueling = true;
 		}
@@ -194,7 +194,7 @@ public class playerlogic : MonoBehaviour {
 				solarenergy.particleSystem.emissionRate = 10;
 				score += 100*Time.deltaTime;
 				energy += 25*Time.deltaTime;
-				shield.GetComponent<shieldlogic>().shieldhealth -= Time.deltaTime*0.5f;
+				//shield.GetComponent<shieldlogic>().shieldhealth -= Time.deltaTime*0.5f;
 			}
 			else
 			{
@@ -253,12 +253,17 @@ public class playerlogic : MonoBehaviour {
 				charge.particleSystem.emissionRate = 50;
 	   			chargetime += Time.deltaTime;
 				chargetime = Mathf.Clamp(chargetime, 0, 3);
+				if (!charge.audio.isPlaying)
+				{
+					charge.audio.Play();
+				}
 			}
 			else
 			{
 				TrailRenderer trail = gameObject.GetComponent<TrailRenderer>();
 				trail.time = 0.5f;
 				charge.particleSystem.emissionRate = 0;
+				charge.audio.Stop();
 			}
 			
 			//set firing mode on mouse release or if there is a shot in the buffer
@@ -311,7 +316,7 @@ public class playerlogic : MonoBehaviour {
 								shieldlogic shieldlogicscript = shield.GetComponent<shieldlogic>();
 								if (shieldlogicscript.shieldhealth < 3)
 								{
-									shieldlogicscript.shieldhealth += chargetime;
+									shieldlogicscript.shieldhealth += chargetime /3;
 								}
 								chargetime = 0.0f;
 							}
@@ -343,6 +348,7 @@ public class playerlogic : MonoBehaviour {
 					newbullet.rigidbody.velocity = rigidbody.velocity*0.5f;
 					newbullet.rigidbody.AddForce(newbullet.transform.right * ((chargetime*10000)*shotspeed));
 					newbullet.rigidbody.freezeRotation = true;
+					newbullet.GetComponent<bulletlogic>().chargetime = chargetime;
 					Destroy(newbullet, 3);
 					shotsfired++;
 					shottimer = Time.time + rapidfiredelay;
