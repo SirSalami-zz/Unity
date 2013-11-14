@@ -31,8 +31,10 @@ public class enemylogic : MonoBehaviour {
 			}
 		}
 		
+		Debug.DrawRay(transform.position, transform.forward * evadedistance, Color.white, 0.1f);
+		
 		//transform.position = new Vector3(transform.position.x, transform.position.y, 0);
-		if (player)
+		if (player && !evade)
 		{
 	    	transform.LookAt(player.transform.position);
 		}
@@ -83,14 +85,13 @@ public class enemylogic : MonoBehaviour {
 		{
 			if (evade && evadetarget)
 			{
-				Debug.DrawLine(transform.position, evadetarget.transform.position, Color.green);
 				Vector3 direction = transform.position - evadetarget.transform.position;
 				print (Vector3.Angle(transform.position, evadetarget.transform.position));
-				if (Vector3.Angle(rigidbody.velocity, evadetarget.transform.position) < 90.0f)
-				{
+
+					Debug.DrawLine(transform.position, evadetarget.transform.position, Color.green);
 					transform.rotation = Quaternion.LookRotation(direction);
 					rigidbody.AddForce(transform.forward * movementspeed, ForceMode.Impulse);
-				}
+				
 			}
 			else
 			{
