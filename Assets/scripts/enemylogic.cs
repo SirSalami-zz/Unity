@@ -36,10 +36,10 @@ public class enemylogic : MonoBehaviour {
 		//transform.position = new Vector3(transform.position.x, transform.position.y, 0);
 		if (player && !evade)
 		{
-	    	transform.LookAt(player.transform.position);
+	    	transform.LookAt(player.transform.position + player.rigidbody.velocity);
 		}
-		//move in direction of target constantly. checks currently velocity and reduces if necessary
-		
+
+		//evasion state		
 		pathfindingtimer += Time.deltaTime;
 		if (pathfindingtimer > 0.33f)
 		{
@@ -58,6 +58,10 @@ public class enemylogic : MonoBehaviour {
 					{
 						nearestobstacledistance = Vector3.Distance(transform.position, obstacle.transform.position);
 						evadetarget = obstacle.gameObject;
+						Vector3 direction = transform.position - evadetarget.transform.position;
+						print (Vector3.Angle(transform.position, evadetarget.transform.position));
+						Debug.DrawLine(transform.position, evadetarget.transform.position, Color.green);
+						transform.rotation = Quaternion.LookRotation(direction);
 					}
 				}
 
@@ -83,14 +87,10 @@ public class enemylogic : MonoBehaviour {
 		}
 		else
 		{
+			//handle evasion velocity, or just move toward player
 			if (evade && evadetarget)
 			{
-				Vector3 direction = transform.position - evadetarget.transform.position;
-				print (Vector3.Angle(transform.position, evadetarget.transform.position));
-
-					Debug.DrawLine(transform.position, evadetarget.transform.position, Color.green);
-					transform.rotation = Quaternion.LookRotation(direction);
-					rigidbody.AddForce(transform.forward * movementspeed, ForceMode.Impulse);
+					rigidbody.AddForce(transform.forward * (movementspeed*0.5f), ForceMode.Impulse);
 				
 			}
 			else
