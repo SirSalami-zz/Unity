@@ -83,7 +83,7 @@ public class guilogic : MonoBehaviour {
 			
 			if (toggleTxt)
 			{
-        		playerlogicscript.movementspeed = GUI.HorizontalSlider(new Rect(Screen.width/2, Screen.height/2, 100, 30), playerlogicscript.movementspeed, 0.0F, 100.0F);
+        		playerlogicscript.acceleration = GUI.HorizontalSlider(new Rect(Screen.width/2, Screen.height/2, 100, 30), playerlogicscript.acceleration, 0.0F, 100.0F);
 			}
 			
 			GUI.Box(new Rect(Screen.width-100, 0, 100, 20), "Level ");

@@ -8,13 +8,15 @@ public class planetlogic : MonoBehaviour {
 	public GameObject player;
 	public GameObject enemy; //is set in editor
 	public GameObject asteroidprefab;
-	public bool trigger;
+	bool trigger;
 	public float rotationspeed;
 	public float orbitspeed;
 	public float mydistance;
 	public float maxhealth;
 	public float health;
 	public GameObject eruption;
+	public float spawntimer;
+	float spawntimertrigger;
 
 	// Use this for initialization
 	void Start () {
@@ -41,6 +43,7 @@ public class planetlogic : MonoBehaviour {
 		
 		maxhealth = 50;
 		health = 50;
+		spawntimer = 3.0f;
 		
 		eruption.transform.localScale = transform.localScale;
 	}
@@ -62,7 +65,7 @@ public class planetlogic : MonoBehaviour {
 
 		if (renderer.isVisible || playerdistance < mydistance)
 		{
-			if (Time.timeScale > 0)
+			if (Time.timeScale == 1)
 			{
 				trigger = true;
 			}
@@ -73,13 +76,15 @@ public class planetlogic : MonoBehaviour {
 		}
 		
 		//spawn enemies
-		//print (timer);
-		if (Time.frameCount%100 == 0 && trigger && Time.timeScale > 0)
+		print (spawntimertrigger);
+		if (spawntimertrigger > spawntimer && trigger && Time.timeScale == 1.0f)
 		{
 			GameObject enemyclone = Instantiate(enemy, new Vector3(transform.position.x, transform.position.y, 0), transform.rotation) as GameObject;
 			enemyclone.GetComponent<enemylogic>().player = player;
 			enemyclone.GetComponent<collision>().player = player;
+			spawntimertrigger = 0.0f;
 		}
+		spawntimertrigger+=Time.deltaTime;
 		
 		//health and effects
 		
@@ -90,6 +95,25 @@ public class planetlogic : MonoBehaviour {
 		
 		eruption.particleSystem.emissionRate = maxhealth - health;
 		
+	}
+	
+	void FixedUpdate()
+	{
+		RaycastHit hit;
+		int layermask = 1<<0 | 1<<8;
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, transform.localScale.x*2+2, layermask);
+		if (hitColliders.Length > 0)
+		{
+			foreach(Collider gravitytarget in hitColliders)
+			{
+				if (gravitytarget.rigidbody)
+				{
+					Debug.DrawLine(transform.position, gravitytarget.transform.position, Color.cyan);
+					Vector3 gravityforce = transform.position - gravitytarget.transform.position;
+					gravitytarget.rigidbody.AddForce(gravityforce.normalized * (transform.localScale.x*0.8f));
+				}
+			}
+		}
 	}
 	
     void OnCollisionEnter(Collision collision) {

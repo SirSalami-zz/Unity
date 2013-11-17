@@ -8,7 +8,7 @@ public class playerlogic : MonoBehaviour {
 	float mousetimer;
 	public Vector3 mousepos;
 	public Vector3 mouseinputposition;
-	public float movementspeed;
+	public float acceleration;
 	public float maxspeed;
     public float smooth;
 	public float targetangle;
@@ -58,11 +58,13 @@ public class playerlogic : MonoBehaviour {
 		energy = 500.0f;
 		maxrapidfireshots = 3;
 		brakes = 0.99f;
-		kickback = 5;
+		kickback = 2;
 		shotspeed = 1;
 		rapidfiredelay = 0.1f;
-		smooth = 4.5f;
-		movementspeed = 10.0f;
+		smooth = 5f;
+		acceleration = 25.0f;
+		maxspeed = 10.0f;
+		shotspeed = 5000.0f;
 	}
 
 	
@@ -93,7 +95,6 @@ public class playerlogic : MonoBehaviour {
 		}
 		if (pause && zoomlerp < 150.0f)
 		{
-			Time.timeScale = 0.0f;
 			Camera.main.orthographic = true;
 			Camera.main.farClipPlane = 1000.0f;
 			if (zoomlerp < 1)
@@ -101,13 +102,14 @@ public class playerlogic : MonoBehaviour {
 				zoomlerp += 0.05f;
 				Camera.main.orthographicSize = Mathf.Lerp (20.0f, 150.0f, zoomlerp);
 			}
+			Time.timeScale = 0.0f;
 		}
 		else
 		{
-			Time.timeScale = 1;
 			Camera.main.orthographic = false;
 			Camera.main.farClipPlane = 1000.0f;
 			zoomlerp = 0;
+			Time.timeScale = 1;
 		}
 		
 		//energy
@@ -209,8 +211,19 @@ public class playerlogic : MonoBehaviour {
 				Ray ray = new Ray(transform.position, transform.right);
 				
 				//Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-		        RaycastHit hit;
-		        if (Physics.Raycast(ray, out hit, 25, 1 << 9))
+		        RaycastHit[] hits;
+				hits = Physics.RaycastAll(transform.position, transform.right, 25, 1 << 9);
+				int i = 0;
+				while (i < hits.Length)
+				{
+					if (!homingtargets.Contains(hits[i].transform.gameObject))
+					{
+						homingtargets.Add(hits[i].transform.gameObject);
+					}
+					i++;
+				}
+				/*
+		        if (Physics.RaycastAll(ray, out hit, 25, 1 << 9))
 				{
 					//homingtarget = hit.transform.gameObject;
 					if (!homingtargets.Contains(hit.transform.gameObject))
@@ -221,6 +234,7 @@ public class playerlogic : MonoBehaviour {
 				else
 				{
 				}
+				*/
 			}
 			else
 			{
@@ -346,7 +360,7 @@ public class playerlogic : MonoBehaviour {
 					newbullet.transform.localScale = newbullet.transform.localScale*chargetime;
 					newbullet.rigidbody.mass = chargetime * 10;
 					newbullet.rigidbody.velocity = rigidbody.velocity*0.5f;
-					newbullet.rigidbody.AddForce(newbullet.transform.right * ((chargetime*10000)*shotspeed));
+					newbullet.rigidbody.AddForce(newbullet.transform.right * ((chargetime)*shotspeed));
 					newbullet.rigidbody.freezeRotation = true;
 					newbullet.GetComponent<bulletlogic>().chargetime = chargetime;
 					Destroy(newbullet, 3);
@@ -356,6 +370,7 @@ public class playerlogic : MonoBehaviour {
 					if (chargetime > 0.2f)
 					{
 						newbullet.transform.localScale = new Vector3 (2.5f, 2.5f, 2.5f)*chargetime;
+						newbullet.rigidbody.mass*=10.0f;
 						kickbackvelocity += newbullet.transform.right * (chargetime*kickback) * -1;
 					}
 					else
@@ -398,7 +413,7 @@ public class playerlogic : MonoBehaviour {
 			{
 				if (rigidbody.velocity.magnitude < maxspeed)
 				{
-					rigidbody.AddForce(transform.right * movementspeed);
+					rigidbody.AddForce(transform.right * acceleration);
 				}
 				else
 				{

@@ -36,9 +36,7 @@ public class starlogic : MonoBehaviour {
 		
 		transform.position = new Vector3(transform.position.x, transform.position.y, 0);
 		
-		//print (Vector3.Distance(player.transform.position, transform.position) + " / " + transform.localScale.x);
-		
-		
+
 		//set refueling state of player if close proximity
 		if (Vector3.Distance(player.transform.position, transform.position) < transform.localScale.x)
 		{
@@ -50,4 +48,25 @@ public class starlogic : MonoBehaviour {
 		}
 	
 	}
+	
+	
+	void FixedUpdate()
+	{
+		RaycastHit hit;
+		int layermask = 1<<0 | 1<<8;
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, transform.localScale.x*2+2, layermask);
+		if (hitColliders.Length > 0)
+		{
+			foreach(Collider gravitytarget in hitColliders)
+			{
+				if (gravitytarget.rigidbody)
+				{
+					Debug.DrawLine(transform.position, gravitytarget.transform.position, Color.cyan);
+					Vector3 gravityforce = transform.position - gravitytarget.transform.position;
+					gravitytarget.rigidbody.AddForce(gravityforce.normalized * (transform.localScale.x*0.5f));
+				}
+			}
+		}
+	}
+	
 }

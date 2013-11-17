@@ -44,8 +44,9 @@ public class enemylogic : MonoBehaviour {
 		if (pathfindingtimer > 0.33f)
 		{
 			Debug.DrawRay(transform.position, rigidbody.velocity.normalized * evadedistance, Color.red, 0.1f);
+			int layermask = 1<<12 | 1<<8;
 			RaycastHit hit;
-	        Collider[] hitColliders = Physics.OverlapSphere(transform.position, evadedistance, 1<<12);
+	        Collider[] hitColliders = Physics.OverlapSphere(transform.position, evadedistance, layermask);
 
 			if (hitColliders.Length > 0)
 			{
@@ -59,7 +60,7 @@ public class enemylogic : MonoBehaviour {
 						nearestobstacledistance = Vector3.Distance(transform.position, obstacle.transform.position);
 						evadetarget = obstacle.gameObject;
 						Vector3 direction = transform.position - evadetarget.transform.position;
-						print (Vector3.Angle(transform.position, evadetarget.transform.position));
+						//print (Vector3.Angle(transform.position, evadetarget.transform.position));
 						Debug.DrawLine(transform.position, evadetarget.transform.position, Color.green);
 						transform.rotation = Quaternion.LookRotation(direction);
 					}

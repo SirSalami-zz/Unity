@@ -55,7 +55,7 @@
      <Compile Include="Assets\scripts\guilogic.cs" />
      <Compile Include="Assets\scripts\missilelogic.cs" />
      <Compile Include="Assets\scripts\orbit.cs" />
-     <Compile Include="Assets\scripts\perlintexture.cs" />
+     <Compile Include="Assets\scripts\perlincolortexture.cs" />
      <Compile Include="Assets\scripts\planetlogic.cs" />
      <Compile Include="Assets\scripts\playerlogic.cs" />
      <Compile Include="Assets\scripts\shieldlogic.cs" />
