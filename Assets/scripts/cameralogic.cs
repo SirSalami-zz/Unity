@@ -16,12 +16,17 @@ public class cameralogic : MonoBehaviour {
 	
 	}
 	
+	float zoomlerp;
+	
 	// Update is called once per frame
 	void Update () {
-		//transform.position = new Vector3(player.transform.position.x, player.transform.position.y, -260f);
-		//transform.position = Vector3.Lerp(transform.position, new Vector3(player.transform.position.x, player.transform.position.y, -260f), 0.25f);
+		
+		zoomlerp=Time.deltaTime;
+		camera.fieldOfView = Mathf.Lerp(camera.fieldOfView, 25.0f+player.rigidbody.velocity.magnitude*2.0f, zoomlerp);
+		
 		if (player)
 		{
+				
 			if (playerlogicscript && playerlogicscript.charging)
 			{
 				float chargetime = playerlogicscript.chargetime * 0.5f;

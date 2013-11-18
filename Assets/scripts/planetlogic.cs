@@ -28,7 +28,7 @@ public class planetlogic : MonoBehaviour {
 		rotationspeed = Random.Range(20.0f, 35.0f);
 		//rotationspeed = 0.0f;
 		
-		orbitspeed = target.transform.localScale.x*Random.Range(0.2f, 0.6f);
+		orbitspeed = Random.Range(2.5f, 5.0f);
         //rigidbody.AddTorque(Vector3.forward * -100);
 		if (Random.Range(0, 2) < 1)
 		{
@@ -43,7 +43,7 @@ public class planetlogic : MonoBehaviour {
 		
 		maxhealth = 50;
 		health = 50;
-		spawntimer = 3.0f;
+		spawntimer = 5.0f;
 		
 		eruption.transform.localScale = transform.localScale;
 	}
