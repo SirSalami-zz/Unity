@@ -19,7 +19,7 @@ public class asteroidfieldlogic : MonoBehaviour {
 			for(float y=0; y <= size; y+=griddistance)
 			{
 				float perlin =  Mathf.PerlinNoise(x*0.01f,y*0.01f) * perlinscale;
-				if (perlin >= 1.0f)
+				if (perlin >= 3.0f)
 				{
 					Vector3 myposition = transform.position;
 					float closeststardistance = Mathf.Infinity;

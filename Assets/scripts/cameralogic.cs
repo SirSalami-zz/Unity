@@ -22,7 +22,7 @@ public class cameralogic : MonoBehaviour {
 	void Update () {
 		
 		zoomlerp=Time.deltaTime;
-		camera.fieldOfView = Mathf.Lerp(camera.fieldOfView, 25.0f+player.rigidbody.velocity.magnitude*2.0f, zoomlerp);
+		camera.fieldOfView = Mathf.Lerp(camera.fieldOfView, 25.0f+player.rigidbody.velocity.magnitude*1.5f, zoomlerp);
 		
 		if (player)
 		{

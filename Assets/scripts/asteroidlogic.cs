@@ -9,14 +9,15 @@ public class asteroidlogic : MonoBehaviour {
 	public GameObject explosionprefab;
 	float spawntimer;
 	float timertrigger;
+	public GameObject star;
 
 	// Use this for initialization
 	void Start () {
 		
 		health = size*1;
 		transform.localScale = new Vector3(size, size, size);
-		gameObject.rigidbody.mass = size*10;
-		rigidbody.AddForce(Random.Range(-100.0f, 100.0f),Random.Range(-100.0f, 100.0f),0, ForceMode.Impulse);
+		//gameObject.rigidbody.mass = size;
+		//rigidbody.AddForce(Random.Range(-100.0f, 100.0f),Random.Range(-100.0f, 100.0f),0, ForceMode.Impulse);
 		rigidbody.AddTorque(Random.Range(-50.0f, 50.0f), Random.Range(-50.0f, 50.0f), Random.Range(-50.0f, 50.0f));
 	}
 	
@@ -47,10 +48,30 @@ public class asteroidlogic : MonoBehaviour {
 	
 	}
 	
+	void FixedUpdate() {
+		
+		if (star)
+		{
+			transform.RotateAround (star.transform.position, Vector3.forward, (200/(Vector3.Distance(transform.position, star.transform.position))) * Time.deltaTime);
+		}
+		
+	}
+	
     void OnCollisionEnter(Collision collision) {
 		
 		if (health < 0)
 		{
+			print ("name: " + collision.gameObject.tag);
+			if (collision.gameObject.tag == "bullet")
+			{
+				GameObject player = GameObject.FindGameObjectWithTag("Player");
+				if (player)
+				{
+					player.GetComponent<playerlogic>().score+=10f;
+				}
+			}
+			
+			
 			collider.enabled = false;
 			
 			if (size > 1)

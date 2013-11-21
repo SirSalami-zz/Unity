@@ -79,7 +79,7 @@ public class guilogic : MonoBehaviour {
 			}
 			
 
-			toggleTxt = GUI.Toggle(new Rect(50, 5, 100, 30), toggleTxt, "Stats");
+			toggleTxt = GUI.Toggle(new Rect(75, 5, 100, 30), toggleTxt, "Stats");
 			
 			if (toggleTxt)
 			{
@@ -87,11 +87,11 @@ public class guilogic : MonoBehaviour {
 				GUI.Box(new Rect(0, 25, 200, 25), "Acceleration: " + playerlogicscript.acceleration);
 				if (GUI.Button(new Rect(200, 25, 25, 25), "-"))
 				{
-					playerlogicscript.acceleration-=5.0f;
+					playerlogicscript.acceleration-=25.0f;
 				}
 				if (GUI.Button(new Rect(225, 25, 25, 25), "+"))
 				{
-					playerlogicscript.acceleration+=5.0f;
+					playerlogicscript.acceleration+=25.0f;
 				}
 				
 				

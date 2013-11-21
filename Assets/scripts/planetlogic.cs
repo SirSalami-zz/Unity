@@ -28,7 +28,7 @@ public class planetlogic : MonoBehaviour {
 		rotationspeed = Random.Range(20.0f, 35.0f);
 		//rotationspeed = 0.0f;
 		
-		orbitspeed = Random.Range(2.5f, 5.0f);
+		orbitspeed = Random.Range(12.5f, 15.0f);
         //rigidbody.AddTorque(Vector3.forward * -100);
 		if (Random.Range(0, 2) < 1)
 		{
@@ -43,9 +43,11 @@ public class planetlogic : MonoBehaviour {
 		
 		maxhealth = 50;
 		health = 50;
-		spawntimer = 5.0f;
+		spawntimer = 3.0f;
 		
 		eruption.transform.localScale = transform.localScale;
+		
+		rigidbody.AddForce(Random.Range(-10.0f, 10.0f),Random.Range(-10.0f, 10.0f),0, ForceMode.Impulse);
 	}
 	
 	void Update() {
@@ -57,7 +59,8 @@ public class planetlogic : MonoBehaviour {
 	    transform.Rotate(Vector3.forward * rotationspeed * Time.deltaTime);
 	 
 	    // orbit
-	    transform.RotateAround (target.transform.position, Vector3.forward, orbitspeed * Time.deltaTime);
+	    //transform.RotateAround (target.transform.position, Vector3.forward, orbitspeed * Time.deltaTime);
+		transform.RotateAround (target.transform.position, Vector3.forward, (100/(Vector3.Distance(transform.position, target.transform.position))) * Time.deltaTime);
 		
 		//check if player is in range of sun to spawn. move this to sun at somepoint so it's called less
 		//print (Vector3.Distance(target.transform.position+new Vector3(0,0,-60), player.transform.position));
@@ -76,7 +79,7 @@ public class planetlogic : MonoBehaviour {
 		}
 		
 		//spawn enemies
-		print (spawntimertrigger);
+		//print (spawntimertrigger);
 		if (spawntimertrigger > spawntimer && trigger && Time.timeScale == 1.0f)
 		{
 			GameObject enemyclone = Instantiate(enemy, new Vector3(transform.position.x, transform.position.y, 0), transform.rotation) as GameObject;
@@ -120,12 +123,16 @@ public class planetlogic : MonoBehaviour {
 		
 		if (health < 0)
 		{
+			//asteroid 1
 			GameObject asteroidclone = Instantiate(asteroidprefab, transform.position, Random.rotation) as GameObject;
 			asteroidclone.GetComponent<asteroidlogic>().size = transform.localScale.x*0.5f;
+			asteroidclone.GetComponent<asteroidlogic>().star = target;
 			Vector3 randomforce = new Vector3(Random.Range(-25.0f*transform.localScale.x, 25.0f*transform.localScale.x), Random.Range(-25.0f*transform.localScale.x, 25.0f*transform.localScale.x), 0.0f);
 			asteroidclone.rigidbody.AddForce(randomforce, ForceMode.Impulse);
+			//asteroid 2
 			asteroidclone = Instantiate(asteroidprefab, transform.position, Random.rotation) as GameObject;
 			asteroidclone.GetComponent<asteroidlogic>().size = transform.localScale.x*0.5f;
+			asteroidclone.GetComponent<asteroidlogic>().star = target;
 			asteroidclone.rigidbody.AddForce(randomforce*-1, ForceMode.Impulse);
 			
 			player.GetComponent<playerlogic>().score += 1000;

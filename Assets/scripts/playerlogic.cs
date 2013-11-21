@@ -8,8 +8,10 @@ public class playerlogic : MonoBehaviour {
 	float mousetimer;
 	public Vector3 mousepos;
 	public Vector3 mouseinputposition;
+	float inputuptime = 1;
 	public float acceleration;
 	public float maxspeed;
+	public float throttle;
     public float smooth;
 	public float targetangle;
 	public float movementtargetangle;
@@ -42,7 +44,7 @@ public class playerlogic : MonoBehaviour {
 	public GameObject missiletargetingline;
 	public bool moving;
 	public float brakes;
-
+	bool stopping;
 	
 	//temp
 	GameObject star;
@@ -57,12 +59,12 @@ public class playerlogic : MonoBehaviour {
 		//stats
 		energy = 500.0f;
 		maxrapidfireshots = 3;
-		brakes = 0.99f;
+		brakes = 0.95f;
 		kickback = 2;
 		shotspeed = 1;
 		rapidfiredelay = 0.1f;
-		smooth = 5f;
-		acceleration = 25.0f;
+		smooth = 2f;
+		acceleration = 500.0f;
 		maxspeed = 10.0f;
 		shotspeed = 5000.0f;
 	}
@@ -144,7 +146,11 @@ public class playerlogic : MonoBehaviour {
 			energy -= Time.deltaTime;
 			if (moving)
 			{
-				energy -= Time.deltaTime*5;
+				if (throttle == 2f)
+				{
+					energy -= Time.deltaTime*5;
+				}
+				energy -= Time.deltaTime*2*throttle;
 			}
 			if (firing)
 			{
@@ -167,6 +173,7 @@ public class playerlogic : MonoBehaviour {
 		if (Input.GetKey(KeyCode.Mouse0))
 		{
 			//check if mouse is in chargebubble (2nd similar call (charging), need to consolidate)
+			//no need for raycast really, replace with distance check
 	        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 	        RaycastHit hit;
 	        if (!Physics.Raycast(ray, out hit, 500, 1 << 11))
@@ -176,17 +183,26 @@ public class playerlogic : MonoBehaviour {
 				{
 		        	targetangle *=-1;
 				}
-				//only set movement target angle when draged a certain distance
+				//only set movement target angle when dragged a certain distance
 				if (Vector3.Distance(mousepos, mouseinputposition) > 80.0f || mousetimer > 0.35)
 				{
 					if (!charging)
 					{
 						moving = true;
+						throttle = Vector3.Distance(Camera.main.WorldToScreenPoint(transform.position), Input.mousePosition)-90;
+						throttle = Mathf.Clamp(throttle/(Screen.height/5.5f), 0f, 2f);
+						if (throttle > 1.0f)
+						{
+							throttle = Mathf.Floor(throttle);
+						}
+						print (throttle);
 						movementtargetangle = targetangle;
 					}
 				}
 			}
 		}
+		
+		gameObject.GetComponent<LineRenderer>().SetPosition(0, new Vector3(15 * throttle, 0, 0));
 		
 		if (!dead)
 		{
@@ -204,7 +220,7 @@ public class playerlogic : MonoBehaviour {
 			}
 			
 			//temp: missile targeting
-			if (mousetimer > 1.0f && !charging)
+			if (mousetimer > 0.50f && !charging)
 			{
 				missiletargetingline.GetComponent<LineRenderer>().SetPosition(1, new Vector3(25, 0, 0));
 				
@@ -244,16 +260,17 @@ public class playerlogic : MonoBehaviour {
 			///targeting temp
 			
 			//increase charge state when mouse1 is held on player
-			if (Input.GetKey(KeyCode.Mouse0) && !firing)
+			if (Input.GetKey(KeyCode.Mouse0) && !firing && mousetimer < 0.5f)
 			{
 				mousetimer += Time.deltaTime;
 				//check if mouse was just press and is within chargebubble
-				if (mousetimer < 0.1f)
+				if (mousetimer > 0.5f)
 				{
 			        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 			        RaycastHit hit;
 			        if (Physics.Raycast(ray, out hit, 500, 1 << 11))
 					{
+						stopping = true;
 						charging = true;
 						charge.particleSystem.Play();
 					}
@@ -341,7 +358,12 @@ public class playerlogic : MonoBehaviour {
 						shotbuffer = true;
 					}
 				}
+				if (throttle == 2f)
+				{
+					throttle = 1f;
+				}
 				mousetimer = 0;
+				stopping = false;
 				charging = false;
 			}
 			
@@ -391,6 +413,9 @@ public class playerlogic : MonoBehaviour {
 		}
 	}
 	
+				float finalacceleration;
+				float finalmaxspeed;
+				float finalsmooth;
  
     void FixedUpdate ()
     {
@@ -398,7 +423,7 @@ public class playerlogic : MonoBehaviour {
 		{
 			//smoothly rotates object in relation to target position (wtf is a quaternion) ;)
 	        Quaternion target = Quaternion.Euler(0, 0, movementtargetangle);
-	        transform.rotation = Quaternion.Lerp(transform.rotation, target, Time.deltaTime * smooth);
+	        transform.rotation = Quaternion.Lerp(transform.rotation, target, Time.deltaTime * finalsmooth);
 			
 			//debugging rays
 			Debug.DrawRay(transform.position, transform.right*100, Color.red, 0);
@@ -409,25 +434,64 @@ public class playerlogic : MonoBehaviour {
 			}
 			
 			//move in direction of target mouse position constantly. checks currently velocity and reduces if necessary
-			if (moving && !charging)
+			if (!stopping)
 			{
-				if (rigidbody.velocity.magnitude < maxspeed)
+				
+				if (throttle == 2f)
 				{
-					rigidbody.AddForce(transform.right * acceleration);
+					finalacceleration = 1000f;
+					finalmaxspeed = maxspeed*2.5f;
+					finalsmooth = smooth*0.25f;
 				}
 				else
 				{
-					rigidbody.AddForce(rigidbody.velocity * -1);
+					finalacceleration = acceleration;
+					finalmaxspeed = maxspeed;
+					finalsmooth = smooth;
+				}
+				
+				if (rigidbody.velocity.magnitude < finalmaxspeed)
+				{
+					rigidbody.AddForce((transform.right * Mathf.Clamp((finalacceleration*throttle), 0f, finalacceleration*(finalmaxspeed/rigidbody.velocity.magnitude)))*Time.deltaTime);
+				}
+				else
+				{
+					rigidbody.AddForce((rigidbody.velocity *- Mathf.Clamp((finalacceleration*throttle), 0f, finalacceleration*(finalmaxspeed/rigidbody.velocity.magnitude)))/5*Time.deltaTime);
 				}
 			}
 			else
 			{
-				rigidbody.velocity *=  brakes;
+				rigidbody.velocity *= brakes;
+				throttle *=  brakes;
 			}
+			
 			
 			//handle kickback
 			rigidbody.AddForce(kickbackvelocity, ForceMode.Impulse);
 			kickbackvelocity *= 0.0f;
+			
+			//gravitywell
+			/*
+			if (charging)
+			{
+				RaycastHit hit;
+				int layermask = 1<<12;
+		        Collider[] hitColliders = Physics.OverlapSphere(transform.position, 50f, layermask);
+				if (hitColliders.Length > 0)
+				{
+					foreach(Collider gravitytarget in hitColliders)
+					{
+						if (gravitytarget.rigidbody)
+						{
+							Debug.DrawLine(transform.position, gravitytarget.transform.position, Color.cyan);
+							Vector3 gravityforce = transform.position - gravitytarget.transform.position;
+							//gravitytarget.rigidbody.AddForce(gravityforce.normalized * Vector3.Distance(transform.position, gravitytarget.transform.position)*0.20f);
+							gravitytarget.rigidbody.AddForce((gravityforce.normalized * Vector3.Distance(transform.position, gravitytarget.transform.position)*250f) * Time.deltaTime);
+						}
+					}
+				}
+			}
+			*/
 		}
     }
 	

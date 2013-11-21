@@ -17,6 +17,8 @@ public class enemylogic : MonoBehaviour {
 		
 		spawntimer += Time.deltaTime;
 		//player = GameObject.Find("player");
+		
+		rigidbody.AddForce(transform.forward * 500.0f, ForceMode.Impulse);
 	
 	}
 	
