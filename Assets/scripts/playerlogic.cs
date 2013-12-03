@@ -8,7 +8,9 @@ public class playerlogic : MonoBehaviour {
 	float mousetimer;
 	public Vector3 mousepos;
 	public Vector3 mouseinputposition;
-	float inputuptime = 1;
+	public Vector3 movementtargetvector;
+	public float mouseinputtime;
+	bool doubleclick;
 	public float acceleration;
 	public float maxspeed;
 	public float throttle;
@@ -16,8 +18,8 @@ public class playerlogic : MonoBehaviour {
 	public float targetangle;
 	public float movementtargetangle;
 	public GameObject bulletclone;
-	public bool charging = false;
-	bool firing = false;
+	public bool charging;
+	bool firing;
 	public float chargetime;
 	public float rapidfiredelay;
 	public float shotspeed;
@@ -27,6 +29,7 @@ public class playerlogic : MonoBehaviour {
 	public int maxrapidfireshots;
 	int shotstofire;
 	int shotsfired;
+	public float shotlife;
 	bool shotbuffer;
 	public bool dead;
 	public GameObject shield;
@@ -42,9 +45,20 @@ public class playerlogic : MonoBehaviour {
 	public bool refueling;
 	public GameObject closeststar;
 	public GameObject missiletargetingline;
+	public float missiletargetinglength;
 	public bool moving;
 	public float brakes;
 	bool stopping;
+	public GameObject movementline;
+	public float playerinputsize = 40f;
+	
+	//simplification / optimization
+	Vector3 myposition;
+	Camera mycamera;
+	Rigidbody mybody;
+	Vector3 myvelocity;
+	float myvelocitymagnitude;
+	
 	
 	//temp
 	GameObject star;
@@ -56,6 +70,8 @@ public class playerlogic : MonoBehaviour {
 		guisystem = GameObject.Find("guisystem");
 		guisystem.GetComponent<guilogic>().player = gameObject;
 		
+		mycamera = Camera.main;
+		
 		//stats
 		energy = 500.0f;
 		maxrapidfireshots = 3;
@@ -64,20 +80,31 @@ public class playerlogic : MonoBehaviour {
 		shotspeed = 1;
 		rapidfiredelay = 0.1f;
 		smooth = 2f;
-		acceleration = 500.0f;
-		maxspeed = 10.0f;
-		shotspeed = 5000.0f;
+		acceleration = 1000.0f;
+		maxspeed = 15.0f;
+		shotspeed = 7500.0f;
+		shotlife = 1.5f;
+		missiletargetinglength = 35f;
 	}
 
 	
 	void Update()
 	{
+		//print (chargetime);
+		
+		myposition = transform.position;
+		mybody = rigidbody;
+		myvelocity = rigidbody.velocity;
+		myvelocitymagnitude = rigidbody.velocity.magnitude;
+		
+		mousepos = new Vector3(Input.mousePosition.x - Screen.width/2, Input.mousePosition.y - Screen.height/2, 0);
+		print (mousepos);
+		
+		
 		//zoomout and pause
 		if (Input.GetAxis("Mouse ScrollWheel") < 0 && !pause)
 		{
-
 			pause = true;
-
 		}
 		if (Input.GetAxis("Mouse ScrollWheel") > 0 && pause)
 		{
@@ -97,19 +124,19 @@ public class playerlogic : MonoBehaviour {
 		}
 		if (pause && zoomlerp < 150.0f)
 		{
-			Camera.main.orthographic = true;
-			Camera.main.farClipPlane = 1000.0f;
+			mycamera.orthographic = true;
+			mycamera.farClipPlane = 1000.0f;
 			if (zoomlerp < 1)
 			{
 				zoomlerp += 0.05f;
-				Camera.main.orthographicSize = Mathf.Lerp (20.0f, 150.0f, zoomlerp);
+				mycamera.orthographicSize = Mathf.Lerp (20.0f, 150.0f, zoomlerp);
 			}
 			Time.timeScale = 0.0f;
 		}
 		else
 		{
-			Camera.main.orthographic = false;
-			Camera.main.farClipPlane = 1000.0f;
+			mycamera.orthographic = false;
+			mycamera.farClipPlane = 1000.0f;
 			zoomlerp = 0;
 			Time.timeScale = 1;
 		}
@@ -122,7 +149,7 @@ public class playerlogic : MonoBehaviour {
 		float stardistance = Mathf.Infinity;
 		foreach(GameObject star in stars)
 		{
-			float stardistancecheck = Vector3.Distance(transform.position, star.transform.position);
+			float stardistancecheck = Vector3.Distance(myposition, star.transform.position);
 			if (stardistancecheck < stardistance)
 			{
 				closeststar = star;
@@ -143,14 +170,10 @@ public class playerlogic : MonoBehaviour {
 		//constanly deplete energy		
 		if (energy > 0)
 		{
-			energy -= Time.deltaTime;
-			if (moving)
+			energy -= Time.deltaTime*2*Mathf.Clamp(throttle, 0.25f, Mathf.Infinity);
+			if (throttle == 2f)
 			{
-				if (throttle == 2f)
-				{
-					energy -= Time.deltaTime*5;
-				}
-				energy -= Time.deltaTime*2*throttle;
+				energy -= Time.deltaTime*5;
 			}
 			if (firing)
 			{
@@ -162,47 +185,61 @@ public class playerlogic : MonoBehaviour {
 			}
 		}
 		
-		//sets target angles based on mouse screen position when clicked or dragged
-		transform.position = new Vector3(transform.position.x, transform.position.y, 0);
-		Vector3 mousepos = new Vector3(Input.mousePosition.x - Screen.width/2, Input.mousePosition.y - Screen.height/2, 0);
+		//mouseclick logic, handles double-click recognition, sets last known click posistion
+		
 		if (Input.GetKeyDown(KeyCode.Mouse0))
 		{
 			mouseinputposition = mousepos;
+			if (Time.time - mouseinputtime < 0.5f && Time.time - mouseinputtime > 0.05f && mousepos.magnitude < playerinputsize)
+			{
+				doubleclick = true;
+			}
+			else
+			{
+				doubleclick = false;
+			}
+			mouseinputtime = Time.time;
 		}
+		
+		//print (doubleclick);
+		
+		//sets target angles based on mouse screen position when clicked or dragged
+		//zfight
+		//transform.position = new Vector3(transform.position.x,myposition.y, 0);
+		
+		Debug.DrawRay(myposition, mousepos, Color.gray);
 		
 		if (Input.GetKey(KeyCode.Mouse0))
 		{
-			//check if mouse is in chargebubble (2nd similar call (charging), need to consolidate)
-			//no need for raycast really, replace with distance check
-	        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-	        RaycastHit hit;
-	        if (!Physics.Raycast(ray, out hit, 500, 1 << 11))
+			//always set targetangle
+			targetangle = Vector3.Angle(Vector3.right, mousepos);
+			if ((Input.mousePosition.y - Screen.height/2) < 0)
 			{
-				targetangle = Vector3.Angle(Vector3.right, mousepos);
-				if ((Input.mousePosition.y - Screen.height/2) < 0)
+	        	targetangle *=-1;
+			}
+			//only set movement target angle when initial click is near player
+			if (mouseinputposition.magnitude < playerinputsize)
+			{
+				if (!charging)
 				{
-		        	targetangle *=-1;
-				}
-				//only set movement target angle when dragged a certain distance
-				if (Vector3.Distance(mousepos, mouseinputposition) > 80.0f || mousetimer > 0.35)
-				{
-					if (!charging)
+					moving = true;
+					movementtargetvector = mousepos;
+					throttle = Vector3.Distance(mycamera.WorldToScreenPoint(myposition), Input.mousePosition)-90;
+					throttle = Mathf.Clamp(throttle/(Screen.width/8.5f), 0f, 2f);
+					if (throttle > 1.0f)
 					{
-						moving = true;
-						throttle = Vector3.Distance(Camera.main.WorldToScreenPoint(transform.position), Input.mousePosition)-90;
-						throttle = Mathf.Clamp(throttle/(Screen.height/5.5f), 0f, 2f);
-						if (throttle > 1.0f)
-						{
-							throttle = Mathf.Floor(throttle);
-						}
-						print (throttle);
-						movementtargetangle = targetangle;
+						throttle = Mathf.Floor(throttle);
 					}
+					//print (throttle);
+					movementtargetangle = targetangle;
 				}
 			}
+			
 		}
 		
-		gameObject.GetComponent<LineRenderer>().SetPosition(0, new Vector3(15 * throttle, 0, 0));
+		//gameObject.GetComponent<LineRenderer>().SetPosition(0, new Vector3(15 * throttle, 0, 0));
+		movementline.GetComponent<LineRenderer>().SetPosition(0,myposition);
+		movementline.GetComponent<LineRenderer>().SetPosition(1,myposition + (movementtargetvector.normalized * (15*throttle)));
 		
 		if (!dead)
 		{
@@ -220,15 +257,18 @@ public class playerlogic : MonoBehaviour {
 			}
 			
 			//temp: missile targeting
-			if (mousetimer > 0.50f && !charging)
+			if (mousetimer > 0.50f && !charging && !moving)
 			{
-				missiletargetingline.GetComponent<LineRenderer>().SetPosition(1, new Vector3(25, 0, 0));
-				
-				Ray ray = new Ray(transform.position, transform.right);
-				
-				//Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+				if (missiletargetingline.GetComponent<LineRenderer>().enabled == false)
+				{
+					missiletargetingline.GetComponent<LineRenderer>().enabled = true;
+				}
+				Ray ray = new Ray (myposition, mousepos);
+				missiletargetingline.GetComponent<LineRenderer>().SetPosition(0, myposition);
+				missiletargetingline.GetComponent<LineRenderer>().SetPosition(1, myposition + ray.direction*missiletargetinglength	);
+
 		        RaycastHit[] hits;
-				hits = Physics.RaycastAll(transform.position, transform.right, 25, 1 << 9);
+				hits = Physics.RaycastAll(transform.position, mousepos, missiletargetinglength, 1 << 9);
 				int i = 0;
 				while (i < hits.Length)
 				{
@@ -238,23 +278,6 @@ public class playerlogic : MonoBehaviour {
 					}
 					i++;
 				}
-				/*
-		        if (Physics.RaycastAll(ray, out hit, 25, 1 << 9))
-				{
-					//homingtarget = hit.transform.gameObject;
-					if (!homingtargets.Contains(hit.transform.gameObject))
-					{
-						homingtargets.Add(hit.transform.gameObject);
-					}
-				}
-				else
-				{
-				}
-				*/
-			}
-			else
-			{
-				missiletargetingline.GetComponent<LineRenderer>().SetPosition(1, new Vector3(0, 0, 0));
 			}
 
 			///targeting temp
@@ -264,23 +287,29 @@ public class playerlogic : MonoBehaviour {
 			{
 				mousetimer += Time.deltaTime;
 				//check if mouse was just press and is within chargebubble
-				if (mousetimer > 0.5f)
-				{
-			        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-			        RaycastHit hit;
-			        if (Physics.Raycast(ray, out hit, 500, 1 << 11))
+
+
+					//print (mousepos.magnitude);
+					if (mousepos.magnitude < playerinputsize)
 					{
-						stopping = true;
-						charging = true;
-						charge.particleSystem.Play();
+						if (doubleclick)
+						{
+							charging = true;
+							charge.particleSystem.Play();
+						}
+						else if (mousetimer > 0.5f)
+						{
+							stopping = true;
+						}
 					}
-				}
+
 			}
 			
 			if (charging)
 			{
-				TrailRenderer trail = gameObject.GetComponent<TrailRenderer>();
-				trail.time = 0;
+				throttle *= 0f;
+				//TrailRenderer trail = gameObject.GetComponent<TrailRenderer>();
+				//trail.time = 0;
 				charge.particleSystem.emissionRate = 50;
 	   			chargetime += Time.deltaTime;
 				chargetime = Mathf.Clamp(chargetime, 0, 3);
@@ -291,31 +320,16 @@ public class playerlogic : MonoBehaviour {
 			}
 			else
 			{
-				TrailRenderer trail = gameObject.GetComponent<TrailRenderer>();
-				trail.time = 0.5f;
+				//TrailRenderer trail = gameObject.GetComponent<TrailRenderer>();
+				//trail.time = 1.0f;
 				charge.particleSystem.emissionRate = 0;
 				charge.audio.Stop();
 			}
 			
 			//set firing mode on mouse release or if there is a shot in the buffer
-			if (Input.GetKeyUp (KeyCode.Mouse0) || shotbuffer)
+			if (Input.GetKeyUp(KeyCode.Mouse0) && mouseinputposition.magnitude > playerinputsize && mousetimer < 0.5f || shotbuffer)
 			{
-				moving = false;
-				if (homingtargets.Count > 0)
-				{
-					int i = 0;
-					foreach (GameObject homingtarget in homingtargets)
-					{
-						missilelogic missilelogicscript = missile.GetComponent<missilelogic>();
-						missilelogicscript.homingtarget = homingtarget;
-						GameObject missileclone = Instantiate(missile, transform.position,  transform.rotation) as GameObject;
-						missileclone.rigidbody.velocity = rigidbody.velocity;
-						energy -= 5;
-						i++;
-					}
-					homingtargets.Clear();
-				}
-				if (mousetimer < 0.35f || chargetime >= 0.35f)
+				if (!charging)
 				{
 					//remove shot from buffer
 					if (shotbuffer)
@@ -325,47 +339,74 @@ public class playerlogic : MonoBehaviour {
 					
 					if (!firing)
 					{
-						//set to rapidfire settings if very little chargetime
-						if (chargetime <= 0.5f)
+						shotstofire = maxrapidfireshots;
+						chargetime = 0.2f;
+						firing = true;
+						shottimer = Time.time+rapidfiredelay;
+
+					}
+					else
+					{
+						if (shotstofire <= 6)
 						{
-							shotstofire = maxrapidfireshots;
-							chargetime = 0.2f;
-							firing = true;
-							shottimer = Time.time;
-						}
-						else
-						{
-							//fire if proximity check
-							if (Vector3.Distance(mousepos, mouseinputposition) > 100.0f)
-							{
-								shotstofire = 1;
-								firing = true;
-								shottimer = Time.time;
-							}
-							else
-							{
-								shieldlogic shieldlogicscript = shield.GetComponent<shieldlogic>();
-								if (shieldlogicscript.shieldhealth < 3)
-								{
-									shieldlogicscript.shieldhealth += chargetime /3;
-								}
-								chargetime = 0.0f;
-							}
+							shotbuffer = true;
+							shotstofire += 1;
 						}
 					}
-					else if (shotstofire < 6 && !shotbuffer)
+
+				}
+			}
+			
+			if (Input.GetKeyUp(KeyCode.Mouse0))
+			{
+				//fire if outside of player proximity
+				if (chargetime > 0.5f)
+				{
+					if (mousepos.magnitude > playerinputsize)
 					{
-						shotbuffer = true;
+						shotstofire = 1;
+						firing = true;
+						shottimer = Time.time;
+					}
+					else
+					{
+						shieldlogic shieldlogicscript = shield.GetComponent<shieldlogic>();
+						if (shieldlogicscript.shieldhealth < 3)
+						{
+							shieldlogicscript.shieldhealth += chargetime;
+						}
 					}
 				}
+				
+				//fire missiles if targets exist
+				if (homingtargets.Count > 0)
+				{
+					int i = 0;
+					foreach (GameObject homingtarget in homingtargets)
+					{
+						missile.GetComponent<missilelogic>().homingtarget = homingtarget;
+						GameObject missileclone = Instantiate(missile,myposition,  transform.rotation) as GameObject;
+						missileclone.rigidbody.velocity = myvelocity;
+						energy -= 5;
+						i++;
+					}
+					homingtargets.Clear();
+				}
+				
 				if (throttle == 2f)
 				{
 					throttle = 1f;
 				}
+				
+				//clear some settings
 				mousetimer = 0;
 				stopping = false;
 				charging = false;
+				moving = false;
+				missiletargetingline.GetComponent<LineRenderer>().enabled = false;
 			}
+			
+
 			
 			//firing mechanism
 			if (firing == true)
@@ -375,30 +416,30 @@ public class playerlogic : MonoBehaviour {
 					shotstofire += 3;
 				}
 				//instantiate shot, grows when charged, sets bullet to self destruct, adds reverse force to player
-				Vector3 firepos = transform.position;
 				if(Time.time > shottimer)
 				{
-					GameObject newbullet = Instantiate(bulletclone, firepos,  Quaternion.Euler(0, 0, targetangle)) as GameObject;
+					GameObject newbullet = Instantiate(bulletclone, myposition,  Quaternion.Euler(0, 0, targetangle)) as GameObject;
 					newbullet.transform.localScale = newbullet.transform.localScale*chargetime;
-					newbullet.rigidbody.mass = chargetime * 10;
-					newbullet.rigidbody.velocity = rigidbody.velocity*0.5f;
-					newbullet.rigidbody.AddForce(newbullet.transform.right * ((chargetime)*shotspeed));
-					newbullet.rigidbody.freezeRotation = true;
+					Rigidbody bulletbody = newbullet.rigidbody;
+					bulletbody.mass = chargetime * 10;
+					bulletbody.velocity = rigidbody.velocity*1f;
+					bulletbody.AddForce(newbullet.transform.right * ((chargetime)*shotspeed));
+					bulletbody.freezeRotation = true;
 					newbullet.GetComponent<bulletlogic>().chargetime = chargetime;
-					Destroy(newbullet, 3);
+					Destroy(newbullet,shotlife);
 					shotsfired++;
 					shottimer = Time.time + rapidfiredelay;
 					//handle kickback and bullet transforms
 					if (chargetime > 0.2f)
 					{
 						newbullet.transform.localScale = new Vector3 (2.5f, 2.5f, 2.5f)*chargetime;
-						newbullet.rigidbody.mass*=10.0f;
+						bulletbody.mass*=chargetime*3f;
 						kickbackvelocity += newbullet.transform.right * (chargetime*kickback) * -1;
 					}
 					else
 					{
 						kickbackvelocity += newbullet.transform.right * (chargetime*kickback) * -1;
-						rigidbody.AddForce(newbullet.transform.right * (chargetime*kickback) * -2, ForceMode.Impulse);
+						mybody.AddForce(newbullet.transform.right * (chargetime*kickback) * -2, ForceMode.Impulse);
 					}
 				}
 				//handing rapidfire
@@ -413,62 +454,71 @@ public class playerlogic : MonoBehaviour {
 		}
 	}
 	
-				float finalacceleration;
-				float finalmaxspeed;
-				float finalsmooth;
+	float finalacceleration;
+	float finalmaxspeed;
+	float finalsmooth;
  
     void FixedUpdate ()
     {
+		mybody = rigidbody;
+		
 		if (!dead)
 		{
 			//smoothly rotates object in relation to target position (wtf is a quaternion) ;)
-	        Quaternion target = Quaternion.Euler(0, 0, movementtargetangle);
+			
+			Quaternion target = Quaternion.Euler(0, 0, movementtargetangle);
+
+
 	        transform.rotation = Quaternion.Lerp(transform.rotation, target, Time.deltaTime * finalsmooth);
 			
 			//debugging rays
-			Debug.DrawRay(transform.position, transform.right*100, Color.red, 0);
-			//Debug.DrawRay(transform.position, star.transform.position - transform.position, Color.yellow, 0, false);
+			Debug.DrawRay(myposition, transform.right*100, Color.red, 0);
+			//Debug.DrawRay(transform.position, star.transform.position -myposition, Color.yellow, 0, false);
 			if (Input.GetKey (KeyCode.Mouse0))
 			{
-				Debug.DrawRay(transform.position, mousepos, Color.green, 0);
+				Debug.DrawRay(myposition, mousepos, Color.green, 0);
 			}
 			
 			//move in direction of target mouse position constantly. checks currently velocity and reduces if necessary
-			if (!stopping)
+
+				
+			if (throttle == 2f)
 			{
-				
-				if (throttle == 2f)
-				{
-					finalacceleration = 1000f;
-					finalmaxspeed = maxspeed*2.5f;
-					finalsmooth = smooth*0.25f;
-				}
-				else
-				{
-					finalacceleration = acceleration;
-					finalmaxspeed = maxspeed;
-					finalsmooth = smooth;
-				}
-				
-				if (rigidbody.velocity.magnitude < finalmaxspeed)
-				{
-					rigidbody.AddForce((transform.right * Mathf.Clamp((finalacceleration*throttle), 0f, finalacceleration*(finalmaxspeed/rigidbody.velocity.magnitude)))*Time.deltaTime);
-				}
-				else
-				{
-					rigidbody.AddForce((rigidbody.velocity *- Mathf.Clamp((finalacceleration*throttle), 0f, finalacceleration*(finalmaxspeed/rigidbody.velocity.magnitude)))/5*Time.deltaTime);
-				}
+				finalacceleration = acceleration*2f;
+				finalmaxspeed = maxspeed*2f;
+				finalsmooth = smooth*1f;
 			}
 			else
 			{
-				rigidbody.velocity *= brakes;
-				throttle *=  brakes;
+				finalacceleration = acceleration;
+				finalmaxspeed = maxspeed;
+				finalsmooth = smooth;
+			}
+			//print (finalmaxspeed);
+			if (myvelocitymagnitude < finalmaxspeed)
+			{
+				mybody.AddForce((transform.right * Mathf.Clamp((finalacceleration*throttle), 0f, finalacceleration*(finalmaxspeed/myvelocitymagnitude)))*Time.deltaTime);
+			}
+			else
+			{
+				mybody.AddForce((myvelocity *- Mathf.Clamp((finalacceleration), 0f, finalacceleration*(finalmaxspeed/myvelocitymagnitude)))/5*Time.deltaTime);
+			}
+
+			if (stopping)
+			{
+				myvelocity *= brakes;
+				rigidbody.velocity = myvelocity;
+				//throttle *= brakes;
+				throttle *= 0f;
 			}
 			
 			
 			//handle kickback
-			rigidbody.AddForce(kickbackvelocity, ForceMode.Impulse);
-			kickbackvelocity *= 0.0f;
+			if (myvelocitymagnitude < maxspeed*0.95f)
+			{
+				mybody.AddForce(kickbackvelocity, ForceMode.Impulse);
+			}
+			kickbackvelocity *= 0f;
 			
 			//gravitywell
 			/*
@@ -476,17 +526,17 @@ public class playerlogic : MonoBehaviour {
 			{
 				RaycastHit hit;
 				int layermask = 1<<12;
-		        Collider[] hitColliders = Physics.OverlapSphere(transform.position, 50f, layermask);
+		        Collider[] hitColliders = Physics.OverlapSphere(myposition, 50f, layermask);
 				if (hitColliders.Length > 0)
 				{
 					foreach(Collider gravitytarget in hitColliders)
 					{
 						if (gravitytarget.rigidbody)
 						{
-							Debug.DrawLine(transform.position, gravitytarget.transform.position, Color.cyan);
-							Vector3 gravityforce = transform.position - gravitytarget.transform.position;
+							Debug.DrawLine(myposition, gravitytarget.transform.position, Color.cyan);
+							Vector3 gravityforce = myposition - gravitytarget.transform.position;
 							//gravitytarget.rigidbody.AddForce(gravityforce.normalized * Vector3.Distance(transform.position, gravitytarget.transform.position)*0.20f);
-							gravitytarget.rigidbody.AddForce((gravityforce.normalized * Vector3.Distance(transform.position, gravitytarget.transform.position)*250f) * Time.deltaTime);
+							gravitytarget.rigidbody.AddForce((gravityforce.normalized * Vector3.Distance(myposition, gravitytarget.transform.position)*450f) * Time.deltaTime);
 						}
 					}
 				}
@@ -502,10 +552,10 @@ public class playerlogic : MonoBehaviour {
     void OnCollisionEnter(Collision collision) {
 		if (shield.GetComponent<shieldlogic>().shieldhealth <= 0.0f)
 		{
-			GameObject explosionclone = Instantiate(explosion, transform.position, transform.rotation) as GameObject;
+			GameObject explosionclone = Instantiate(explosion,myposition, transform.rotation) as GameObject;
 			Destroy(explosionclone, 5.0f);
-			rigidbody.velocity = new Vector3(0, 0, 0);
-			rigidbody.detectCollisions = false;
+			myvelocity = new Vector3(0, 0, 0);
+			mybody.detectCollisions = false;
 			dead = true;
 			//Destroy(gameObject, 3.0f);
 		}

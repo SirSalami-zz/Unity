@@ -2,23 +2,27 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.Workbench ActiveDocument="Assets\scripts\playerlogic.cs">
     <Files>
-      <File FileName="Assets\scripts\planetlogic.cs" Line="63" Column="120" />
-      <File FileName="Assets\scripts\asteroidlogic.cs" Line="19" Column="5" />
-      <File FileName="Assets\scripts\starlogic.cs" Line="106" Column="66" />
-      <File FileName="Assets\scripts\systemslogic.cs" Line="32" Column="66" />
-      <File FileName="Assets\scripts\asteroidfieldlogic.cs" Line="37" Column="55" />
-      <File FileName="Assets\scripts\enemylogic.cs" Line="21" Column="44" />
-      <File FileName="Assets\scripts\guilogic.cs" Line="109" Column="80" />
-      <File FileName="Assets\scripts\cameralogic.cs" Line="25" Column="98" />
-      <File FileName="Assets\scripts\playerlogic.cs" Line="444" Column="31" />
-      <File FileName="Assets\scripts\enemyspawn.cs" Line="18" Column="32" />
-      <File FileName="Assets\scripts\perlincolortexture.cs" Line="49" Column="9" />
+      <File FileName="Assets\scripts\playerlogic.cs" Line="350" Column="27" />
+      <File FileName="Assets\scripts\enemylogic.cs" Line="108" Column="5" />
+      <File FileName="Assets\scripts\enemylogic1.cs" Line="78" Column="14" />
+      <File FileName="Assets\scripts\asteroidlogic.cs" Line="22" Column="3" />
+      <File FileName="Assets\scripts\starlogic.cs" Line="9" Column="5" />
+      <File FileName="Assets\scripts\wormholelogic.cs" Line="32" Column="37" />
+      <File FileName="Assets\scripts\perlincolorstar.cs" Line="16" Column="5" />
+      <File FileName="Assets\scripts\perlincolortexture.cs" Line="37" Column="1" />
+      <File FileName="Assets\scripts\stargravity.cs" Line="2" Column="16" />
+      <File FileName="Assets\scripts\systemslogic.cs" Line="50" Column="17" />
+      <File FileName="Assets\scripts\planetlogic.cs" Line="48" Column="17" />
+      <File FileName="Assets\scripts\asteroidfieldlogic.cs" Line="35" Column="106" />
+      <File FileName="Assets\scripts\guilogic.cs" Line="212" Column="37" />
+      <File FileName="Assets\scripts\cameralogic.cs" Line="14" Column="59" />
       <File FileName="Assets\scripts\shieldlogic.cs" Line="4" Column="2" />
       <File FileName="Assets\scripts\time.cs" Line="17" Column="12" />
-      <File FileName="Assets\scripts\missilelogic.cs" Line="42" Column="1" />
       <File FileName="Assets\scripts\bulletlogic.cs" Line="20" Column="20" />
       <File FileName="Assets\scripts\turretlogic.cs" Line="12" Column="17" />
-      <File FileName="Assets\scripts\collision.cs" Line="26" Column="57" />
+      <File FileName="Assets\scripts\perlinasteroidmesh.cs" Line="36" Column="3" />
+      <File FileName="Assets\scripts\orbit.cs" Line="1" Column="1" />
+      <File FileName="Assets\scripts\missilelogic.cs" Line="37" Column="7" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

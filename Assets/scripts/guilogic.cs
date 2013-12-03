@@ -194,6 +194,27 @@ public class guilogic : MonoBehaviour {
 				}
 				
 				
+				GUI.Box(new Rect(0, 275, 200, 25), "Shot Life-Span: " + playerlogicscript.shotlife);
+				if (GUI.Button(new Rect(200, 275, 25, 25), "-"))
+				{
+					playerlogicscript.shotlife-=0.1f;
+				}
+				if (GUI.Button(new Rect(225, 275, 25, 25), "+"))
+				{
+					playerlogicscript.shotlife+=0.1f;
+				}
+				
+				GUI.Box(new Rect(0, 300, 200, 25), "Targeting Length: " + playerlogicscript.missiletargetinglength);
+				if (GUI.Button(new Rect(200, 300, 25, 25), "-"))
+				{
+					playerlogicscript.missiletargetinglength-=1f;
+				}
+				if (GUI.Button(new Rect(225, 300, 25, 25), "+"))
+				{
+					playerlogicscript.missiletargetinglength+=1f;
+				}
+				
+				
 				
 			}
 			

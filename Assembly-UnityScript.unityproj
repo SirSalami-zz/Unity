@@ -5,11 +5,11 @@
 	<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
 	<ProductVersion>10.0.20506</ProductVersion>
 	<SchemaVersion>2.0</SchemaVersion>
-	<ProjectGuid>{B2B58FB2-4462-6B0C-A872-40DD957E5FE0}</ProjectGuid>
+	<ProjectGuid>{1753851C-AE59-909A-15AB-E3FFE34BC5A0}</ProjectGuid>
 	<OutputType>Library</OutputType>
 	<AppDesignerFolder>Properties</AppDesignerFolder>
 	<RootNamespace></RootNamespace>
-	<AssemblyName>Assembly-CSharp</AssemblyName>
+	<AssemblyName>Assembly-UnityScript</AssemblyName>
 	<TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
 	<FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -44,29 +44,7 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\scripts\asteroidfieldlogic.cs" />
-     <Compile Include="Assets\scripts\asteroidlogic.cs" />
-     <Compile Include="Assets\scripts\bulletlogic.cs" />
-     <Compile Include="Assets\scripts\cameralogic.cs" />
-     <Compile Include="Assets\scripts\createplanet.cs" />
-     <Compile Include="Assets\scripts\enemylogic.cs" />
-     <Compile Include="Assets\scripts\enemylogic1.cs" />
-     <Compile Include="Assets\scripts\guilogic.cs" />
-     <Compile Include="Assets\scripts\missilelogic.cs" />
-     <Compile Include="Assets\scripts\orbit.cs" />
-     <Compile Include="Assets\scripts\perlinasteroidmesh.cs" />
-     <Compile Include="Assets\scripts\perlincolorstar.cs" />
-     <Compile Include="Assets\scripts\perlincolortexture.cs" />
-     <Compile Include="Assets\scripts\planetlogic.cs" />
-     <Compile Include="Assets\scripts\playerlogic.cs" />
-     <Compile Include="Assets\scripts\shieldlogic.cs" />
-     <Compile Include="Assets\scripts\stargravity.cs" />
-     <Compile Include="Assets\scripts\starlinelogic.cs" />
-     <Compile Include="Assets\scripts\starlogic.cs" />
-     <Compile Include="Assets\scripts\systemslogic.cs" />
-     <Compile Include="Assets\scripts\time.cs" />
-     <Compile Include="Assets\scripts\turretlogic.cs" />
-     <Compile Include="Assets\scripts\wormholelogic.cs" />
+     <Compile Include="Assets\CrumpleMesh.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
