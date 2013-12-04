@@ -1,16 +1,16 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\scripts\playerlogic.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\scripts\starlogic.cs">
     <Files>
-      <File FileName="Assets\scripts\playerlogic.cs" Line="350" Column="27" />
-      <File FileName="Assets\scripts\enemylogic.cs" Line="108" Column="5" />
+      <File FileName="Assets\scripts\playerlogic.cs" Line="350" Column="26" />
+      <File FileName="Assets\scripts\starlogic.cs" Line="102" Column="8" />
+      <File FileName="Assets\scripts\enemylogic.cs" Line="80" Column="13" />
       <File FileName="Assets\scripts\enemylogic1.cs" Line="78" Column="14" />
-      <File FileName="Assets\scripts\asteroidlogic.cs" Line="22" Column="3" />
-      <File FileName="Assets\scripts\starlogic.cs" Line="9" Column="5" />
+      <File FileName="Assets\scripts\asteroidlogic.cs" Line="26" Column="18" />
       <File FileName="Assets\scripts\wormholelogic.cs" Line="32" Column="37" />
-      <File FileName="Assets\scripts\perlincolorstar.cs" Line="16" Column="5" />
+      <File FileName="Assets\scripts\perlincolorstar.cs" Line="37" Column="3" />
       <File FileName="Assets\scripts\perlincolortexture.cs" Line="37" Column="1" />
-      <File FileName="Assets\scripts\stargravity.cs" Line="2" Column="16" />
+      <File FileName="Assets\scripts\stargravity.cs" Line="45" Column="3" />
       <File FileName="Assets\scripts\systemslogic.cs" Line="50" Column="17" />
       <File FileName="Assets\scripts\planetlogic.cs" Line="48" Column="17" />
       <File FileName="Assets\scripts\asteroidfieldlogic.cs" Line="35" Column="106" />
@@ -22,7 +22,7 @@
       <File FileName="Assets\scripts\turretlogic.cs" Line="12" Column="17" />
       <File FileName="Assets\scripts\perlinasteroidmesh.cs" Line="36" Column="3" />
       <File FileName="Assets\scripts\orbit.cs" Line="1" Column="1" />
-      <File FileName="Assets\scripts\missilelogic.cs" Line="37" Column="7" />
+      <File FileName="Assets\scripts\missilelogic.cs" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

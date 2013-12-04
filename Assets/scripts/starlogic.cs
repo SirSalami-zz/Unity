@@ -87,8 +87,8 @@ public class starlogic : MonoBehaviour {
 	{
 		//this was gravity. move these remnants to playerlogic eventually
 		RaycastHit hit;
-		int layermask = 1<<0 | 1<<8;
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, (2+transform.localScale.x)*1000, layermask);
+		int layermask = 1<<0;
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, (2+transform.localScale.x)*3, layermask);
 		if (hitColliders.Length > 0)
 		{
 			foreach(Collider gravitytarget in hitColliders)
@@ -98,7 +98,10 @@ public class starlogic : MonoBehaviour {
 					
 					//Debug.DrawLine(transform.position, gravitytarget.transform.position, Color.cyan);
 					Vector3 gravityforce = transform.position - gravitytarget.transform.position;
-					gravitytarget.rigidbody.AddForce(gravityforce.normalized * 1f);
+					gravitytarget.rigidbody.AddForce(gravityforce.normalized * 2f);
+					//gravitytarget.transform.RotateAround(transform.position, transform.forward, 0.1f);
+					//gravitytarget.transform.RotateAround (transform.position, Vector3.forward, (1/(Vector3.Distance(gravitytarget.transform.position, transform.position))) * Time.deltaTime);
+					print (gravitytarget);
 					
 				}
 			}

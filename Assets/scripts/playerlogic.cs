@@ -28,7 +28,6 @@ public class playerlogic : MonoBehaviour {
 	float shottimer;
 	public int maxrapidfireshots;
 	int shotstofire;
-	int shotsfired;
 	public float shotlife;
 	bool shotbuffer;
 	public bool dead;
@@ -98,7 +97,7 @@ public class playerlogic : MonoBehaviour {
 		myvelocitymagnitude = rigidbody.velocity.magnitude;
 		
 		mousepos = new Vector3(Input.mousePosition.x - Screen.width/2, Input.mousePosition.y - Screen.height/2, 0);
-		print (mousepos);
+		//print (mousepos);
 		
 		
 		//zoomout and pause
@@ -189,8 +188,9 @@ public class playerlogic : MonoBehaviour {
 		
 		if (Input.GetKeyDown(KeyCode.Mouse0))
 		{
+			Vector3 previousinputposition = mouseinputposition;
 			mouseinputposition = mousepos;
-			if (Time.time - mouseinputtime < 0.5f && Time.time - mouseinputtime > 0.05f && mousepos.magnitude < playerinputsize)
+			if (Time.time - mouseinputtime < 0.5f && Time.time - mouseinputtime > 0.05f && mouseinputposition.magnitude < playerinputsize && previousinputposition.magnitude < playerinputsize)
 			{
 				doubleclick = true;
 			}
@@ -217,15 +217,15 @@ public class playerlogic : MonoBehaviour {
 			{
 	        	targetangle *=-1;
 			}
-			//only set movement target angle when initial click is near player
+			//only set movement target angle when initial click is near player and a little time has passed OR user drags input to show intent
 			if (mouseinputposition.magnitude < playerinputsize)
 			{
-				if (!charging)
+				if (!charging && mousetimer > 0.33f || Vector3.Distance(mouseinputposition, mousepos) > 80f)
 				{
 					moving = true;
 					movementtargetvector = mousepos;
 					throttle = Vector3.Distance(mycamera.WorldToScreenPoint(myposition), Input.mousePosition)-90;
-					throttle = Mathf.Clamp(throttle/(Screen.width/8.5f), 0f, 2f);
+					throttle = Mathf.Clamp(throttle/(Screen.height/8.5f), 0f, 2f);
 					if (throttle > 1.0f)
 					{
 						throttle = Mathf.Floor(throttle);
@@ -307,7 +307,7 @@ public class playerlogic : MonoBehaviour {
 			
 			if (charging)
 			{
-				throttle *= 0f;
+				//throttle *= 0f;
 				//TrailRenderer trail = gameObject.GetComponent<TrailRenderer>();
 				//trail.time = 0;
 				charge.particleSystem.emissionRate = 50;
@@ -347,10 +347,9 @@ public class playerlogic : MonoBehaviour {
 					}
 					else
 					{
-						if (shotstofire <= 6)
+						if (shotstofire < 3)
 						{
-							shotbuffer = true;
-							shotstofire += 1;
+							shotstofire += 3;
 						}
 					}
 
@@ -411,10 +410,6 @@ public class playerlogic : MonoBehaviour {
 			//firing mechanism
 			if (firing == true)
 			{
-				if (shotbuffer)
-				{
-					shotstofire += 3;
-				}
 				//instantiate shot, grows when charged, sets bullet to self destruct, adds reverse force to player
 				if(Time.time > shottimer)
 				{
@@ -427,7 +422,7 @@ public class playerlogic : MonoBehaviour {
 					bulletbody.freezeRotation = true;
 					newbullet.GetComponent<bulletlogic>().chargetime = chargetime;
 					Destroy(newbullet,shotlife);
-					shotsfired++;
+					shotstofire--;
 					shottimer = Time.time + rapidfiredelay;
 					//handle kickback and bullet transforms
 					if (chargetime > 0.2f)
@@ -443,11 +438,11 @@ public class playerlogic : MonoBehaviour {
 					}
 				}
 				//handing rapidfire
-				if (shotsfired >= shotstofire)
+				//print (shotstofire);
+				if (shotstofire <= 0)
 				{
 					firing = false;
-					shottimer = 0;
-					shotsfired = 0;
+					shottimer = rapidfiredelay;
 					chargetime = 0;
 				}
 			}
@@ -491,6 +486,7 @@ public class playerlogic : MonoBehaviour {
 			else
 			{
 				finalacceleration = acceleration;
+				//finalmaxspeed = maxspeed;
 				finalmaxspeed = maxspeed;
 				finalsmooth = smooth;
 			}
@@ -504,12 +500,12 @@ public class playerlogic : MonoBehaviour {
 				mybody.AddForce((myvelocity *- Mathf.Clamp((finalacceleration), 0f, finalacceleration*(finalmaxspeed/myvelocitymagnitude)))/5*Time.deltaTime);
 			}
 
-			if (stopping)
+			if (stopping || throttle <= 0f || myvelocity.magnitude > finalmaxspeed && !firing && !charging)
 			{
 				myvelocity *= brakes;
 				rigidbody.velocity = myvelocity;
 				//throttle *= brakes;
-				throttle *= 0f;
+				//throttle *= 0f;
 			}
 			
 			
